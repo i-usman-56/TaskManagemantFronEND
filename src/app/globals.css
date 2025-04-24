@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.bg-custom-image {
+    background-image: url('../assets/images/musemind-ux-agency-Mgm6aq1UYpI-unsplash.jpg'); /* Update the path to your image */
+    background-size: cover;
+    background-position: center;
+    
+  }
+.bg-custom-image1 {
+    background-image: url('../assets/images/andrew-neel-cckf4TsHAuw-unsplash.jpg'); /* Update the path to your image */
+    background-size: cover;
+    background-position: center;
+    
+  }
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+    backdrop-filter: blur(10px); /* Apply blur effect */
+    border-radius: 10px; /* Rounded corners */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+  }
+
+
+  /* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 5px; /* Set scrollbar height */
+  width: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #888; /* Thumb color */
+  border-radius: 10px; /* Rounded corners */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Thumb color on hover */
+}
+
+.unselectable {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
