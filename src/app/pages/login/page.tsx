@@ -6,12 +6,12 @@ import React, { useEffect } from "react";
 export default function Login() {
   const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      router.push("/"); // Redirect to login if not authenticated
-    }
-  }, [router]);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     router.push("/"); // Redirect to login if not authenticated
+  //   }
+  // }, [router]);
   return (
     <>
       <LoginScreen />

@@ -131,7 +131,9 @@ export default function InCompletedTasks() {
         )}
           {/* Show "Add Task" button if the user is not an admin */}
           {localStorage.getItem("role") === "admin" && (
-            <button className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded">
+            <button    onClick={() => {
+              setIsModalOpen(true);
+            }} className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded">
               Add Task
             </button>
           )}

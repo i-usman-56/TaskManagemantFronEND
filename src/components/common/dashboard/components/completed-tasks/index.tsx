@@ -125,13 +125,17 @@ export default function CompletedTasks() {
     <div className="grid grid-cols-4 gap-4">
       {completedTasks.length === 0 ? (
         <div className="col-span-4 text-center p-4">
-          <h2 className="text-lg font-semibold text-[#444444]">You don't have any tasks.</h2>
+          <h2 className="text-lg font-semibold text-[#444444]">For Now No Task is Completed</h2>
           {/* Show "Add Task" button if the user is not an admin */}
-          {localStorage.getItem("role") === "admin" && (
-            <button className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded">
+          {/* {localStorage.getItem("role") === "admin" && (
+            <button 
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
+            className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded">
               Add Task
             </button>
-          )}
+          )} */}
         </div>
       ) : (
         completedTasks.map((task) => (

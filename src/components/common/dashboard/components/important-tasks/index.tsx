@@ -1,13 +1,20 @@
-import { addTaskToFavorites, deleteTask, fetchAllTasksImportant, fetchAllTasksofUserImportant, Task, updateTaskStatus } from '@/utils';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import React, { useState } from 'react'
-import { FaEdit, FaHeart } from 'react-icons/fa';
+import {
+  addTaskToFavorites,
+  deleteTask,
+  fetchAllTasksImportant,
+  fetchAllTasksofUserImportant,
+  Task,
+  updateTaskStatus,
+} from "@/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { FaEdit, FaHeart } from "react-icons/fa";
 import { AnimatePresence, motion } from "framer-motion";
 
-import { MdDelete } from 'react-icons/md';
-import { toast } from 'react-toastify';
-import { IoCloseCircleSharp } from 'react-icons/io5';
-import ModelContent from '@/components/common/model-content';
+import { MdDelete } from "react-icons/md";
+import { toast } from "react-toastify";
+import { IoCloseCircleSharp } from "react-icons/io5";
+import ModelContent from "@/components/common/model-content";
 
 const bounceTransition = {
   type: "spring",
@@ -17,7 +24,7 @@ const bounceTransition = {
 export default function ImportantTasks() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null); // State to hold the selected task
-    const token =
+  const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const role =
     typeof window !== "undefined" ? localStorage.getItem("role") : null;
@@ -40,29 +47,32 @@ export default function ImportantTasks() {
   } = useQuery<Task[], Error>(["favorite-tasks", token], fetchTasks, {
     enabled: !!token, // Only run the query if token is available
   });
-  const mutation = useMutation<void, unknown, { taskId: string; userID: string }>(
-    ({ taskId, userID }) => addTaskToFavorites(userID, taskId, token!),
-    {
-      onSuccess: () => {
-        toast.success("Task added to favorites!");
-        queryClient.invalidateQueries(["favorite-tasks", token]);
-        queryClient.invalidateQueries(["tasks", token]);
-      },
-      onError: (error) => {
-        if (error.status === 400) {
-          toast.error(error.response?.data?.message || "Error adding task to favorites.");
-          return;
-        }
-        if (error.status === 403) {
-          toast.error(
-            error.response?.data?.error || "Error adding task to favorites."
-          );
-          return;
-        }
-        console.log(error);
-      },
-    }
-  );
+  const mutation = useMutation<
+    void,
+    unknown,
+    { taskId: string; userID: string }
+  >(({ taskId, userID }) => addTaskToFavorites(userID, taskId, token!), {
+    onSuccess: () => {
+      toast.success("Task added to favorites!");
+      queryClient.invalidateQueries(["favorite-tasks", token]);
+      queryClient.invalidateQueries(["tasks", token]);
+    },
+    onError: (error) => {
+      if (error.status === 400) {
+        toast.error(
+          error.response?.data?.message || "Error adding task to favorites."
+        );
+        return;
+      }
+      if (error.status === 403) {
+        toast.error(
+          error.response?.data?.error || "Error adding task to favorites."
+        );
+        return;
+      }
+      console.log(error);
+    },
+  });
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -70,20 +80,23 @@ export default function ImportantTasks() {
     setSelectedTask(task); // Set the selected task
     setIsModalOpen(true); // Open the modal
   };
-  
+
   const handleAddToFavorites = (taskId: string, userID: string) => {
     mutation.mutate({ taskId, userID });
   };
-  const deleteMutation = useMutation((taskId: string) => deleteTask(taskId, token!), {
-    onSuccess: () => {
-      // Invalidate and refetch the tasks
-      queryClient.invalidateQueries(["favorite-tasks", token]);
-      toast.success("Task deleted successfully!");
-    },
-    onError: (error) => {
-      toast.error(error.response.data.error);
-    },
-  });
+  const deleteMutation = useMutation(
+    (taskId: string) => deleteTask(taskId, token!),
+    {
+      onSuccess: () => {
+        // Invalidate and refetch the tasks
+        queryClient.invalidateQueries(["favorite-tasks", token]);
+        toast.success("Task deleted successfully!");
+      },
+      onError: (error) => {
+        toast.error(error.response.data.error);
+      },
+    }
+  );
   const statusMutation = useMutation(
     (task: Task) => updateTaskStatus(task, token!),
     {
@@ -93,11 +106,9 @@ export default function ImportantTasks() {
         queryClient.invalidateQueries(["tasks", token]);
       },
       onError: (error) => {
-        console.log(error)
+        console.log(error);
         if (error.status === 400) {
-          toast.error(
-            error.response?.data?.message
-          );
+          toast.error(error.response?.data?.message);
           return;
         }
         toast.error("Error updating task status.");
@@ -105,14 +116,19 @@ export default function ImportantTasks() {
       },
     }
   );
-  
+
   // Function to handle status update
   const handleStatusUpdate = (task: Task) => {
-    const updatedTask = { ...task, status: task.status === "completed" ? "pending" : "completed" };
+    const updatedTask = {
+      ...task,
+      status: task.status === "completed" ? "pending" : "completed",
+    };
     statusMutation.mutate(updatedTask);
   };
   const handleDelete = (taskId: string) => {
-    const confirmed = window.confirm("Are you sure you want to delete this task?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
     if (confirmed) {
       deleteMutation.mutate(taskId);
     }
@@ -121,33 +137,41 @@ export default function ImportantTasks() {
   if (isLoading) return <div>Loading tasks...</div>;
   if (error) return <div>Error fetching tasks: {error.message}</div>;
   return (
-    <div style={{height:"calc(100vh - 110px)"}} className=" mt-4  overflow-y-scroll custom-scrollbar">
-  <div className="grid grid-cols-4 gap-4">
-    {tasks.length === 0 ? (
-      <div className="col-span-4 text-center p-4">
-        <h2 className="text-lg font-semibold text-[#444444]">You don't have any tasks.</h2>
-        {/* Show "Add Task" button if the user is not an admin */}
-        {localStorage.getItem("role") === "admin" && (
-          <button className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded">
+    <div
+      style={{ height: "calc(100vh - 110px)" }}
+      className=" mt-4  overflow-y-scroll custom-scrollbar"
+    >
+      <div className="grid grid-cols-4 gap-4">
+        {tasks.length === 0 ? (
+          <div className="col-span-4 text-center p-4">
+            <h2 className="text-lg font-semibold text-[#444444]">
+              No Task is Important Added Go and and USe task ito Important to
+              more usefull usaage
+            </h2>
+            {/* Show "Add Task" button if the user is not an admin */}
+            {/* {localStorage.getItem("role") === "admin" && (
+          <button    onClick={() => {
+            setIsModalOpen(true);
+          }} className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded">
             Add Task
           </button>
-        )}
-      </div>
-    ) : (
-      tasks.map((task) => (
-        <div
-          key={task._id}
-          className="space-y-4 h-[240px] rounded-sm p-3 bg-[#04293A] flex flex-col"
-        >
-          <h1 className="text-[20px] font-bold leading-6 text-[#040303]">
-            {task.title}
-          </h1>
-          <p className="text-[16px] text-ellipsis line-clamp-6 h-[120px] leading-5 font-medium text-[#444444]">
-            {task.description}
-          </p>
-          <div className="flex items-center justify-between">
-          <button
-                onClick={() => handleStatusUpdate(task)}
+        )} */}
+          </div>
+        ) : (
+          tasks.map((task) => (
+            <div
+              key={task._id}
+              className="space-y-4 h-[240px] rounded-sm p-3 bg-[#04293A] flex flex-col"
+            >
+              <h1 className="text-[20px] font-bold leading-6 text-[#040303]">
+                {task.title}
+              </h1>
+              <p className="text-[16px] text-ellipsis line-clamp-6 h-[120px] leading-5 font-medium text-[#444444]">
+                {task.description}
+              </p>
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => handleStatusUpdate(task)}
                   disabled={task.status === "completed"}
                   className={`w-[50%] uppercase ${
                     task.status === "completed"
@@ -157,17 +181,30 @@ export default function ImportantTasks() {
                 >
                   {task.status}
                 </button>
-            <div className="flex justify-between w-[50%] pl-4">
-              <FaHeart  className={`w-[30px] ${task.isFavorite ? "text-red":"text-white"} h-[30px] cursor-pointer`} onClick={() => handleAddToFavorites(task._id,task.assignedTo._id)} />
-              <FaEdit className="w-[30px] h-[30px] cursor-pointer"  onClick={() => openModal(task)} />
-              <MdDelete className="w-[30px] h-[30px] cursor-pointer" onClick={() => handleDelete(task._id)} />
+                <div className="flex justify-between w-[50%] pl-4">
+                  <FaHeart
+                    className={`w-[30px] ${
+                      task.isFavorite ? "text-red" : "text-white"
+                    } h-[30px] cursor-pointer`}
+                    onClick={() =>
+                      handleAddToFavorites(task._id, task.assignedTo._id)
+                    }
+                  />
+                  <FaEdit
+                    className="w-[30px] h-[30px] cursor-pointer"
+                    onClick={() => openModal(task)}
+                  />
+                  <MdDelete
+                    className="w-[30px] h-[30px] cursor-pointer"
+                    onClick={() => handleDelete(task._id)}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      ))
-    )}
-  </div>
-  <div className="hidden lg:block">
+          ))
+        )}
+      </div>
+      <div className="hidden lg:block">
         <AnimatePresence>
           {isModalOpen && (
             <motion.div
@@ -198,6 +235,6 @@ export default function ImportantTasks() {
           )}
         </AnimatePresence>
       </div>
-</div>
-  )
+    </div>
+  );
 }

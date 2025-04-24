@@ -59,7 +59,7 @@ export default function Card() {
       queryClient.invalidateQueries(["tasks", token]);
     },
     onError: (error) => {
-      console.log(error)
+      console.log(error);
       if (error.status === 400) {
         toast.error(
           error.response?.data?.message || "Error adding task to favorites."
@@ -93,34 +93,34 @@ export default function Card() {
       },
     }
   );
-// Mutation to update task status
-const statusMutation = useMutation(
-  (task: Task) => updateTaskStatus(task, token!),
-  {
-    onSuccess: () => {
-      toast.success("Task status updated!");
-      queryClient.invalidateQueries(["tasks", token]);
-    },
-    onError: (error) => {
-      console.log(error)
-      if (error.status === 400) {
-        toast.error(
-          error.response?.data?.message
-        );
-        return;
-      }
-      toast.error("Error updating task status.");
-      console.error(error);
-    },
-  }
-);
+  // Mutation to update task status
+  const statusMutation = useMutation(
+    (task: Task) => updateTaskStatus(task, token!),
+    {
+      onSuccess: () => {
+        toast.success("Task status updated!");
+        queryClient.invalidateQueries(["tasks", token]);
+      },
+      onError: (error) => {
+        console.log(error);
+        if (error.status === 400) {
+          toast.error(error.response?.data?.message);
+          return;
+        }
+        toast.error("Error updating task status.");
+        console.error(error);
+      },
+    }
+  );
 
-// Function to handle status update
-const handleStatusUpdate = (task: Task) => {
-  const updatedTask = { ...task, status: task.status === "completed" ? "pending" : "completed" };
-  statusMutation.mutate(updatedTask);
-};
-
+  // Function to handle status update
+  const handleStatusUpdate = (task: Task) => {
+    const updatedTask = {
+      ...task,
+      status: task.status === "completed" ? "pending" : "completed",
+    };
+    statusMutation.mutate(updatedTask);
+  };
 
   const handleDelete = (taskId: string) => {
     const confirmed = window.confirm(
@@ -141,7 +141,10 @@ const handleStatusUpdate = (task: Task) => {
     setIsModalOpen(true); // Open the modal
   };
   return (
-    <div style={{height:"calc(100vh - 110px)"}} className=" mt-4  overflow-y-scroll custom-scrollbar  ">
+    <div
+      style={{ height: "calc(100vh - 110px)" }}
+      className=" mt-4  overflow-y-scroll custom-scrollbar  "
+    >
       <div className="grid grid-cols-4 gap-4">
         {tasks.length === 0 ? (
           <div className="col-span-4 text-center p-4">
@@ -150,7 +153,12 @@ const handleStatusUpdate = (task: Task) => {
             </h2>
             {/* Show "Add Task" button if the user is not an admin */}
             {localStorage.getItem("role") === "admin" && (
-              <button className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded">
+              <button
+                onClick={() => {
+                  setIsModalOpen(true);
+                }}
+                className="mt-4 bg-[#C70D3A] text-white font-semibold py-2 px-4 rounded"
+              >
                 Add Task
               </button>
             )}
@@ -169,7 +177,7 @@ const handleStatusUpdate = (task: Task) => {
               </p>
               <div className="flex items-center justify-between">
                 <button
-                onClick={() => handleStatusUpdate(task)}
+                  onClick={() => handleStatusUpdate(task)}
                   disabled={task.status === "completed"}
                   className={`w-[50%] uppercase ${
                     task.status === "completed"
@@ -180,14 +188,18 @@ const handleStatusUpdate = (task: Task) => {
                   {task.status}
                 </button>
                 <div className="flex justify-between w-[50%] pl-4">
-
                   <FaHeart
-                    className={`w-[30px] ${task.isFavorite ? "text-red":"text-white"} h-[30px] cursor-pointer`}
+                    className={`w-[30px] ${
+                      task.isFavorite ? "text-red" : "text-white"
+                    } h-[30px] cursor-pointer`}
                     onClick={() =>
                       handleAddToFavorites(task._id, task.assignedTo._id)
                     }
                   />
-                  <FaEdit className="w-[30px] h-[30px] cursor-pointer"  onClick={() => openModal(task)}  />
+                  <FaEdit
+                    className="w-[30px] h-[30px] cursor-pointer"
+                    onClick={() => openModal(task)}
+                  />
                   <MdDelete
                     className="w-[30px] h-[30px] cursor-pointer"
                     onClick={() => handleDelete(task._id)}
