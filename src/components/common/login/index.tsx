@@ -74,7 +74,7 @@ const Login: React.FC = () => {
             Login
           </button>
         </form>
-        <Link href={`/pages/signup`}>
+        <Link href={`/signup`}>
           <h2 className="text-center text-[16px] mt-2 cursor-pointer ">
             Create Account
           </h2>

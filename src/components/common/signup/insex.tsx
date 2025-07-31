@@ -20,7 +20,7 @@ const Signup: React.FC = () => {
       console.log(data);
       toast.success("User Created SuccesFully");
       // Handle successful sign-up (e.g., redirect to login page)
-      router.push("/pages/login"); // Redirect to the login page after successful sign-up
+      router.push("/login"); // Redirect to the login page after successful sign-up
     },
     onError: (error: any) => {
       toast.error(error?.response.data.error);
