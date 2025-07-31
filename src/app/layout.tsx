@@ -4,6 +4,7 @@ import "./globals.css";
 import TanstackProvider from "@/providers";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthProvider } from "@/components/provider/auth-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -33,7 +34,7 @@ export default function RootLayout({
       >
         <TanstackProvider>
           <ToastContainer position="bottom-right" />
-          {children}
+          <AuthProvider>{children}</AuthProvider>
         </TanstackProvider>
       </body>
     </html>

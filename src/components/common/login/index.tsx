@@ -42,7 +42,7 @@ const Login: React.FC = () => {
         <h1 className="text-[16px] uppercase font-bold text-[#09090b] mb-4">Account Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block  text-sm font-medium text-[#09090b]">
+            <label className="block  text-sm font-montserrat text-[#09090b]">
               Username
             </label>
             <input
@@ -55,7 +55,7 @@ const Login: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#09090b]">
+            <label className="block text-sm font-geist text-[#09090b]">
               Password
             </label>
             <input
