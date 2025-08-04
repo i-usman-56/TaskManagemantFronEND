@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Define public paths that don't require authentication
     // Added '/error' to ensure dynamic error pages are accessible without login
-    const publicPaths = ["/login", "/signup", "/error"];
+    const publicPaths = ["/error", "/auth"];
     const isPublicPath = publicPaths.some((publicPath) =>
       pathname.startsWith(publicPath)
     );
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log(
           "No token found and not on public path. Redirecting to /login"
         );
-        router.push("/login");
+        router.push("/auth/sign-in");
         return; // Stop further execution
       }
     }
