@@ -3,7 +3,7 @@
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import CustomLoader from "../common/loader/customLoaders";
+import CustomLoader from "@/components/common/loader/customLoaders";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Define public paths that don't require authentication
     // Added '/error' to ensure dynamic error pages are accessible without login
-    const publicPaths = ["/error", "/auth"];
+    const publicPaths = ["/error", "/auth","/dashboard"];
     const isPublicPath = publicPaths.some((publicPath) =>
       pathname.startsWith(publicPath)
     );
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // If user is on a public path (like login/signup/error) but has a token, redirect to home
       if (isPublicPath) {
         console.log("Redirecting authenticated user from public path to /");
-        router.push("/");
+        router.push("/dashboard");
         return; // Stop further execution
       }
     } else {

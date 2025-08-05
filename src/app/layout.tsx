@@ -3,7 +3,7 @@ import "./globals.css";
 import TanstackProvider from "@/providers";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AuthProvider } from "@/components/provider/auth-provider";
+import { AuthProvider } from "@/providers/auth-provider";
 
 
 export const metadata: Metadata = {

@@ -2,6 +2,7 @@ import React from "react";
 import firrbag from "@/assets/fi-rr-bag.svg";
 import firrbag1 from "@/assets/Section Icon.svg";
 import firrbag2 from "@/assets/iconsignup.svg";
+import Image from "next/image";
 const list = [
   {
     icon: firrbag,
@@ -39,7 +40,7 @@ const WelcomeBack = () => {
       <div className="space-y-[35px] lg:space-y-[42px]  w-[80%] lg:w-[60%] mx-auto pt-[45px] lg:pt-12 xl:pt-[85px] 2xl:pt-[53px]">
         {list.map((item, index) => (
           <div key={index} className="flex flex-row items-start gap-3">
-            <img src={item.icon} alt="" width={24} height={24} />
+            <Image src={item.icon} alt="" width={24} height={24} />
             <div>
               <p className="text-[17px] font-medium leading-[140%] text-white">
                 {item.heading}

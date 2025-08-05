@@ -15,7 +15,7 @@ export function LogoutButton() {
       "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=strict";
 
     // Redirect to login (middleware will handle the rest)
-    router.push("/login");
+    router.push("/auth/sign-in");
   };
 
   return (

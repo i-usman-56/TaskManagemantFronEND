@@ -1,6 +1,6 @@
 "use client";
-import { AuthProvider } from "@/components/provider/auth-provider";
 import HomeScreen from "@/components/screens/main-screen";
+import { AuthProvider } from "@/providers/auth-provider";
 
 export default function Home() {
   return (

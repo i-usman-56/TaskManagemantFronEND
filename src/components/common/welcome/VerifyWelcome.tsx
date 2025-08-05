@@ -1,4 +1,5 @@
 import keysvg from "@/assets/Key.svg";
+import Image from "next/image";
 const list = [
   {
     icon: keysvg,
@@ -19,7 +20,7 @@ const VerifyWelcome = () => {
       <div className="space-y-[35px] lg:space-y-[42px]  w-[80%] lg:w-[60%] mx-auto pt-[45px] lg:pt-12 xl:pt-[85px] 2xl:pt-[53px]">
         {list.map((item, index) => (
           <div key={index} className="flex  items-start gap-3">
-            <img src={item.icon} alt="" width={24} height={24} />
+            <Image src={item.icon} alt="" width={24} height={24} />
             <div>
               <p className="text-[17px] font-medium leading-[140%] text-white">
                 {item.heading}
