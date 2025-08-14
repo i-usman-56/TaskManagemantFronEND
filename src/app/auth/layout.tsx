@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 import VerifyWelcome from "@/components/common/welcome/VerifyWelcome";
 import SignupWelcome from "@/components/common/welcome/SignupWelcome";
@@ -50,7 +50,7 @@ export default function AuthLayout({
 
         <div className="flex flex-col items-center justify-between md:p-3 w-full md:w-2/4 h-full py-7 md:h-auto custom-scrollbar-hide overflow-y-scroll ">
           <div className="h-auto flex items-center justify-center flex-col my-auto">
-             <div className="flex justify-center ">
+             <div className="flex justify-center  ">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-8 bg-primaryBlue rounded-md flex items-center justify-center">
                 <div className="text-white font-bold text-sm">TMS</div>
@@ -60,19 +60,10 @@ export default function AuthLayout({
               </span>
             </div>
           </div>
-               <><motion.div
-                  className={` lg:pb-[18px] ${(isSignIn|| isSignUp)?"hidden md:flex":"hidden" } 
-                `}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                />
-
-               
-
+               <>
                 <div
                   className={`${(isSignIn|| isSignUp)?"hidden md:flex":"hidden" }   bg-blue-50 rounded-lg p-[2px] md:w-[24rem] 
-                      g:mt-7 xl:mt-[44px] mt-6
+                    mt-4
                   w-[20rem] mb-3 lg:mb-5`}
                 >
                   <button
@@ -103,11 +94,7 @@ export default function AuthLayout({
                   >
                     Sign Up
                   </button>
-                </div></>
-          
-
-           
-           
+                </div></>          
                 {children}
              
           </div>

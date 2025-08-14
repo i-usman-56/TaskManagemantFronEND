@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Define public paths that don't require authentication
     // Added '/error' to ensure dynamic error pages are accessible without login
-    const publicPaths = ["/error", "/auth","/dashboard"];
+    const publicPaths = ["/error", "/auth", "/onBoarding"];
     const isPublicPath = publicPaths.some((publicPath) =>
       pathname.startsWith(publicPath)
     );
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log("Is Public Path:", isPublicPath);
 
     // Get token from localStorage
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     console.log("Token in localStorage:", token ? "Found" : "Not Found");
 
     if (token) {

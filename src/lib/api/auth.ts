@@ -1,0 +1,214 @@
+import apiClient from "../../utils/axios";
+
+export interface RegisterRequest {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phoneNumber: string;
+  countryCode: string;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  tempToken: string;
+  payload: {
+    userid: string;
+    email: string;
+    countryCode: string;
+    phoneNumber: string;
+  };
+}
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  success: boolean;
+  message: string;
+  tempToken: string;
+  channel: string;
+
+  payload: {
+    userid: string;
+    email: string;
+    countryCode: string;
+    phoneNumber: string;
+  };
+  user: any;
+  accessToken: string;
+  refreshToken: string;
+}
+export interface verificationRequest {
+  tempToken: string;
+  channel: string;
+}
+
+export interface verificationResponse {
+  success: Boolean;
+  message: string;
+  tempToken: string;
+  channel: string;
+}
+export interface verification2faRequest {
+  tempToken: string;
+  otp: string;
+}
+
+export interface verification2faResponse {
+  success: Boolean;
+  message: string;
+  accessToken: string;
+  refreshToken: string;
+}
+export interface resendRequest {
+  tempToken: string;
+}
+
+export interface resendResponse {
+  success: Boolean;
+  message: string;
+  tempToken: string;
+}
+export interface resend2faRequest {
+  tempToken: string;
+}
+
+export interface resend2faResponse {
+  success: Boolean;
+  message: string;
+  tempToken: string;
+}
+export interface forgotPasswordRequest {
+  email: string;
+}
+
+export interface forgotPasswordResponse {
+  success: Boolean;
+  message: string;
+}
+export interface resetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+export interface resetPasswordResponse {
+  success: Boolean;
+  message: string;
+}
+export interface verifyRequest {
+  tempToken: string;
+  otp: string;
+}
+
+export interface verifyResponse {
+  success: Boolean;
+  message: string;
+  tempToken: string;
+}
+
+export interface CheckUsernameRequest {
+  username: string;
+}
+
+export interface CheckUsernameResponse {
+  success: boolean;
+  message: string;
+}
+
+export const authApi = {
+  register: async (data: RegisterRequest): Promise<RegisterResponse> => {
+    const response = await apiClient.post<RegisterResponse>(
+      "/api/auth/register",
+      data
+    );
+    return response.data;
+  },
+  login: async (data: LoginRequest) => {
+    const response = await apiClient.post<LoginResponse>(
+      "/api/auth/login",
+      data,
+      { validateStatus: (status) => status < 500 } // Throw only for server errors
+    );
+    if (response.status !== 200 && response.status !== 202) {
+      throw { response }; // Force React Query's onError
+    }
+
+    return response;
+  },
+
+  checkUsername: async (
+    data: CheckUsernameRequest
+  ): Promise<CheckUsernameResponse> => {
+    console.log("Checking username availability:", data.username);
+
+    const response = await apiClient.post<CheckUsernameResponse>(
+      "/api/auth/check-username",
+      data
+    );
+
+    console.log("Username check result:", response.data);
+
+    return response.data;
+  },
+  verificationChoice: async (
+    data: verificationRequest
+  ): Promise<verificationResponse> => {
+    const response = await apiClient.post<verificationResponse>(
+      "/api/auth/choice-otp",
+      data
+    );
+    return response.data;
+  },
+  resendOTP: async (data: resendRequest): Promise<resendResponse> => {
+    const response = await apiClient.post<resendResponse>(
+      "/api/auth/resend-otp",
+      data
+    );
+    return response.data;
+  },
+  verifyOTP: async (data: verifyRequest): Promise<verifyResponse> => {
+    const response = await apiClient.post<verifyResponse>(
+      "/api/auth/verify-otp",
+      data
+    );
+    return response.data;
+  },
+  resend2faOTP: async (data: resend2faRequest): Promise<resend2faResponse> => {
+    const response = await apiClient.post<resend2faResponse>(
+      "/api/auth/resend-login-otp",
+      data
+    );
+    return response.data;
+  },
+  verify2faOTP: async (
+    data: verification2faRequest
+  ): Promise<verification2faResponse> => {
+    const response = await apiClient.post<verification2faResponse>(
+      "/api/auth/login-verify",
+      data
+    );
+    return response.data;
+  },
+  forgotPassword: async (
+    data: forgotPasswordRequest
+  ): Promise<forgotPasswordResponse> => {
+    const response = await apiClient.post<forgotPasswordResponse>(
+      "/api/auth/forgot-password",
+      data
+    );
+    return response.data;
+  },
+  resetPassword: async (
+    data: resetPasswordRequest
+  ): Promise<resetPasswordResponse> => {
+    const response = await apiClient.post<resetPasswordResponse>(
+      "/api/auth/reset-password",
+      data
+    );
+    return response.data;
+  },
+};

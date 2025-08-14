@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import TanstackProvider from "@/providers";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "@/providers/auth-provider";
-
+import { Toaster } from "react-hot-toast";
+import ReactQueryProvider from "@/providers/ReactQueryProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,13 +17,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={` unselectable antialiased`}
-      >
-        <TanstackProvider>
-          <ToastContainer position="bottom-right" />
-          <AuthProvider>{children}</AuthProvider>
-        </TanstackProvider>
+      <body className="unselectable antialiased">
+        <ReactQueryProvider>
+          <TanstackProvider>
+            <AuthProvider>
+              {children}
+              <Toaster position="top-center" reverseOrder={false} />
+            </AuthProvider>
+          </TanstackProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

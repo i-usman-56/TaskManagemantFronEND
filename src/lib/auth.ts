@@ -1,27 +1,37 @@
-// Utility functions for authentication
-export const setAuthToken = (token: string) => {
-  // Set in localStorage for client-side access
+// ==========================
+// Auth Token Utilities
+// ==========================
+
+export const setTokens = (accessToken: string, refreshToken: string) => {
   if (typeof window !== "undefined") {
-    localStorage.setItem("token", token)
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
   }
 
-  // Set in cookies for middleware
-  document.cookie = `token=${token}; path=/; max-age=86400; SameSite=strict`
-}
+  document.cookie = `accessToken=${accessToken}; path=/; max-age=86400; SameSite=strict`;
+  document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${
+    7 * 86400
+  }; SameSite=strict`; // 7 days for refresh
+};
 
-export const removeAuthToken = () => {
-  // Remove from localStorage
+export const getTokens = () => {
   if (typeof window !== "undefined") {
-    localStorage.removeItem("token")
+    return {
+      accessToken: localStorage.getItem("accessToken"),
+      refreshToken: localStorage.getItem("refreshToken"),
+    };
+  }
+  return { accessToken: null, refreshToken: null };
+};
+
+export const removeTokens = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   }
 
-  // Remove from cookies
-  document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=strict"
-}
-
-export const getAuthToken = () => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("token")
-  }
-  return null
-}
+  document.cookie =
+    "accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=strict";
+  document.cookie =
+    "refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=strict";
+};

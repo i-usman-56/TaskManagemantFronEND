@@ -3,22 +3,51 @@ import React, { useState } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 import VerifyOTPForm from "@/components/screens/verify-opt-form";
+import { use2faResendOTPMutation, use2faVerifyOTPMutation, useResendOTPMutation, useVerifyOTPMutation } from "@/hooks/use-auth-mutations";
+import { useSearchParams } from "next/navigation";
 
 const VerifyOTP = () => {
-  const queryClient = useQueryClient();
-  const [isResendingOtp, setIsResendingOtp] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const Params = useSearchParams();
+
+  const verify2fa = Boolean(Params.get("2faVerify"))
+  console.log(verify2fa)
+          const resendMutation = useResendOTPMutation()
+          const resend2faMutation = use2faResendOTPMutation()
+          const verifyOTPMutation = useVerifyOTPMutation()
+          const verify2faOTPMutation = use2faVerifyOTPMutation()
 
 
   // Handle OTP Verification
   const handleVerificationSubmit = async (otpCode: string) => {
+            const tempToken = localStorage.getItem("tempToken")||""
+if (verify2fa) {
+   verify2faOTPMutation.mutate({
+      tempToken,
+      otp:otpCode
+    })
+}else {
+   verifyOTPMutation.mutate({
+      tempToken,
+      otp:otpCode
+    })
+}
+   
    
   };
 
   // Handle Resending OTP Request
   const handleResendOTP = async (e: React.FormEvent) => {
+        const tempToken = localStorage.getItem("tempToken")||""
+
     e.preventDefault();
+    if (verify2fa) {
+    resend2faMutation.mutate({tempToken})
+      
+    }
+    else{
+      
+      resendMutation.mutate({tempToken})
+    }
    
   };
 
@@ -27,9 +56,9 @@ const VerifyOTP = () => {
         email={`usman@gmail.com`}
         handleVerificationSubmit={handleVerificationSubmit}
         handleResendOTP={handleResendOTP}
-        isLoading={isLoading}
-        isResendingOtp={isResendingOtp}
-        error={error}
+        isLoading={verifyOTPMutation.isLoading|| verify2faOTPMutation.isLoading}
+        isResendingOtp={resendMutation.isLoading|| resend2faMutation.isLoading}
+        error={""}
       />
   );
 };

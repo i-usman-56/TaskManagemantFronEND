@@ -11,14 +11,16 @@ import { toast } from "react-toastify"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 import Link from "next/link"
 import { SignInFormValues, signInSchema } from "@/types/auth/login"
+import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/hooks/use-auth-mutations";
 
 
 
 export default function LoginPage() {
  const [showPassword, setShowPassword] = useState(false);
- 
+ const router = useRouter()
+ const loginMutaion = useLoginMutation()
 
-  const [isLoading, setLoading] = useState(false);
 
   const {
     register,
@@ -29,21 +31,15 @@ export default function LoginPage() {
   });
 
   const handleGoogleLogin = () => {
-  };
+    router.push(`${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`)
+    // Google login logic
+  }
 
   const handleLogin = async (data: SignInFormValues) => {
-    try {
-      setLoading(true);
-      console.log(data)
-     
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Login failed. Please try again.";
-      toast.error(errorMessage);
-      console.error("Login Error:", errorMessage);
-    } finally {
-      setLoading(false);
-    }
+   loginMutaion.mutate({
+    email:data.email,
+    password:data.password
+   })
   };
 
   const toggleShowPassword = () => {
@@ -153,10 +149,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={loginMutaion.isLoading}
           className="mt-5 flex items-center justify-center gap-2 bg-[#005294] hover:bg-[#0e68b3] text-white h-[44px] rounded-[12px] w-full font-medium font-sfDisplay leading-[140%] text-[14px]"
         >
-          {isLoading && <FiLoader className="animate-spin" />}
+          {loginMutaion.isLoading && <FiLoader className="animate-spin" />}
           Sign In
         </button>
       </form>

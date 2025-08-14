@@ -1,8 +1,7 @@
-"use client"
+"use client";
 import React, { useState, useRef } from "react";
 import { FiLoader } from "react-icons/fi";
-import { maskEmail, maskPhoneNumber } from "@/utils/utils";
-
+import { useSearchParams } from "next/navigation";
 
 interface VerifyOTPFormProps {
   email: string;
@@ -21,10 +20,13 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
   isResendingOtp,
   error,
 }) => {
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const searchParams = useSearchParams();
+
+  const otpChannel = searchParams.get("channel") || "";
+
   const [errors, setErrors] = useState<string | null>(null);
-  const otpChannel:string=''
-  const phoneNumber=''
+  const phoneNumber = "";
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Handle OTP submission
@@ -43,19 +45,22 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
   const handleChange = (value: string, index: number) => {
     // Only allow numeric input
     const numericValue = value.replace(/[^0-9]/g, "");
-    
+
     const newOtp = [...otp];
     newOtp[index] = numericValue.slice(-1);
     setOtp(newOtp);
 
     // Auto-focus next input if value is entered
-    if (numericValue && index < 3) {
+    if (numericValue && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   // Handle backspace and navigation
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
     if (e.key === "Backspace") {
       if (otp[index] === "" && index > 0) {
         // If current field is empty, move to previous field and clear it
@@ -77,23 +82,26 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
   };
 
   // Handle paste functionality
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>, index: number) => {
+  const handlePaste = (
+    e: React.ClipboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text");
     const numericData = pastedData.replace(/[^0-9]/g, "");
-    
+
     if (numericData.length > 0) {
       const newOtp = [...otp];
-      const pasteLength = Math.min(numericData.length, 4 - index);
-      
+      const pasteLength = Math.min(numericData.length, 6 - index);
+
       for (let i = 0; i < pasteLength; i++) {
-        if (index + i < 4) {
+        if (index + i < 6) {
           newOtp[index + i] = numericData[i];
         }
       }
-      
+
       setOtp(newOtp);
-      
+
       // Focus the next empty field or the last field
       const nextFocusIndex = Math.min(index + pasteLength, 3);
       inputRefs.current[nextFocusIndex]?.focus();
@@ -112,26 +120,25 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
       </h1>
       {otpChannel === "email" ? (
         <p className="text-[#64748B] font-normal font-sfDisplay text-[14px] leading-[140%] text-center mb-5 w-3/5">
-          We have sent the verification code to your Email Address :{" "}
-          <span>{maskEmail(email)}</span>
+          We have sent the verification code to your Email Address .{" "}
         </p>
       ) : (
         <p className=" text-[#64748B] font-normal font-sfDisplay text-[14px] leading-[140%] text-center mb-5 w-3/5">
-          We have sent the verification code to your Phone Number ending in{" "}
-          {maskPhoneNumber(phoneNumber)}
+          We have sent the verification code to your Phone Number.
         </p>
       )}
       <form
         onSubmit={onSubmit}
         className="flex flex-col items-center my-6 md:w-[25rem] w-[21rem]"
       >
+        
         <div className="flex gap-2 mb-4">
           {otp.map((digit, index) => (
             <input
               key={index}
-ref={(el) => {
-  inputRefs.current[index] = el;
-}}
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -165,7 +172,7 @@ ref={(el) => {
           className=" flex items-center justify-center gap-2 bg-[#005294] hover:bg-[#0e68b3] text-white py-3 rounded-[12px]  font-sfDisplay font-medium leading-[140%] text-[14px] w-full h-14 mt-6"
         >
           {isLoading && <FiLoader className="animate-spin" />}
-          Sign In
+          Verify
         </button>
         <div className="flex items-center gap-3 my-1 mb-2">
           {/* <p className="text-black text-sm font-inter">Need a new code?</p> */}
@@ -181,20 +188,20 @@ ref={(el) => {
                 Resending
               </p>
             ) : (
-              <p className="hover:underline text-[#64748B] leading-[140%] font-sfDisplay font-medium text-[14px] mt-5 ">Resend new Code</p>
+              <p className="hover:underline text-[#64748B] leading-[140%] font-sfDisplay font-medium text-[14px] mt-5 ">
+                Resend new Code
+              </p>
             )}
           </button>
         </div>
       </form>
-          <div className="flex flex-col pb-1 items-center justify-center text-nowrap gap-2 md:gap-3 pt-[32px]">
-                <div>
-                  <p className="text-[14px] leading-[140%] space-y-[14px] font-sfDisplay font-normal text-[#64748B] text-center md:text-left">
-                    © 2024 Hey Dividend, LLC. All rights reserved.
-                  </p>
-                </div>
-      
-               
-              </div>
+      <div className="flex flex-col pb-1 items-center justify-center text-nowrap gap-2 md:gap-3 pt-[32px]">
+        <div>
+          <p className="text-[14px] leading-[140%] space-y-[14px] font-sfDisplay font-normal text-[#64748B] text-center md:text-left">
+            © 2024 Hey Dividend, LLC. All rights reserved.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,21 +1,23 @@
 "use client"
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import smsSvg from '@/assets/sms.svg'
+import smsSvg from '@/assets/sms.svg' 
 
 import { MdError } from "react-icons/md";
 import Image from "next/image";
 import Link from "next/link";
 import { ForgotPasswordForm, ForgotPasswordSchema } from "@/types/auth/forget-password";
+import { useforgotPasswordMutation } from "@/hooks/use-auth-mutations";
+import { FiLoader } from "react-icons/fi";
 
 
 
 const ForgetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const ForgotPasswordMutation = useforgotPasswordMutation()
+
   const {
     register,
     handleSubmit,
@@ -25,25 +27,11 @@ const ForgetPasswordPage = () => {
   });
 
   const handleForgotPassword = async (data: ForgotPasswordForm) => {
-    setLoading(true);
-    try {
-      console.log(data)
-      // await forgetPassword({
-      //   email: data.email,
-      //   isAskDividend: isAi ? true : false,
-      // });
-      toast.success("Password reset link sent to your email");
-      setError(null);
-      // navigate("/");
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "An error occurred.";
-      toast.error(errorMessage);
-      setError("The email you entered is not registered.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
+  
+      ForgotPasswordMutation.mutate({
+        email: data.email,
+      });
+   
   };
 
   return (
@@ -106,9 +94,11 @@ const ForgetPasswordPage = () => {
           <button
             type="submit"
             className="mt-6 flex items-center justify-center gap-2 bg-[#005294] hover:bg-[#0e68b3] text-white h-[44px] rounded-[12px] w-full font-medium text-[14px]  leading-[140%] font-sfDisplay  mb-5"
-            disabled={loading}
+            disabled={ForgotPasswordMutation.isLoading}
           >
-            {loading ? "Sending..." : "Send Reset Link"}
+                        {ForgotPasswordMutation.isLoading && <FiLoader className="animate-spin" />}
+            
+            { ForgotPasswordMutation.isLoading? "Sending..." : "Send Reset Link"}
           </button>
         </form>
 
