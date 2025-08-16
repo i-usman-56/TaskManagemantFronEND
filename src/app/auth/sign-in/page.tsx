@@ -1,26 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FiLoader } from "react-icons/fi";
 import { MdError } from "react-icons/md";
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
-import { toast } from "react-toastify"
-import { EyeIcon, EyeOffIcon } from "lucide-react"
-import Link from "next/link"
-import { SignInFormValues, signInSchema } from "@/types/auth/login"
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { toast } from "react-toastify";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import Link from "next/link";
+import { SignInFormValues, signInSchema } from "@/types/auth/login";
 import { useRouter } from "next/navigation";
 import { useLoginMutation } from "@/hooks/use-auth-mutations";
 
-
-
 export default function LoginPage() {
- const [showPassword, setShowPassword] = useState(false);
- const router = useRouter()
- const loginMutaion = useLoginMutation()
-
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const loginMutaion = useLoginMutation();
 
   const {
     register,
@@ -30,25 +27,47 @@ export default function LoginPage() {
     resolver: zodResolver(signInSchema),
   });
 
+  // const handleGoogleLogin = () => {
+  //   router.push(`${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`)
+  //   // Google login logic
+  // }
   const handleGoogleLogin = () => {
-    router.push(`${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`)
-    // Google login logic
-  }
+    const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`;
+    const popup = window.open(googleAuthUrl, "_blank", "width=500,height=600");
+
+    window.addEventListener("message", (event) => {
+      console.log("insode");
+      // Security check
+      if (event.origin !== process.env.NEXT_PUBLIC_API_HOST) return;
+
+      const data = event.data;
+
+      if (data.onBoarding) {
+        localStorage.setItem("tempToken", data.tempToken);
+        router.push("/onBoarding");
+      } else {
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+        router.push("/dashboard");
+      }
+
+      if (popup) popup.close();
+    });
+  };
 
   const handleLogin = async (data: SignInFormValues) => {
-   loginMutaion.mutate({
-    email:data.email,
-    password:data.password
-   })
+    loginMutaion.mutate({
+      email: data.email,
+      password: data.password,
+    });
   };
 
   const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
 
-
   return (
-      <div className="flex flex-col items-center md:w-[25rem] w-[21rem] mt-5 lg:mt-8 xl:mt-[32px]">
+    <div className="flex flex-col items-center md:w-[25rem] w-[21rem] mt-5 lg:mt-8 xl:mt-[32px]">
       <form onSubmit={handleSubmit(handleLogin)} className="w-full">
         <div className="inputs flex flex-col gap-6">
           <div className="email flex flex-col gap-2">
@@ -78,7 +97,7 @@ export default function LoginPage() {
               </p>
             )}
           </div>
-        
+
           <div className="password flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <label
@@ -133,17 +152,16 @@ export default function LoginPage() {
                 Remember Me
               </label>
             </div>
-              <Link href={`/auth/forget-password`}>
-            <div>
-              <button
-                type="button" // Change to button type to prevent form submission
-               
-                className="text-[#005294] text-[16px] font-medium  font-manrope leading-[150%] tracking-[-2%]  "
+            <Link href={`/auth/forget-password`}>
+              <div>
+                <button
+                  type="button" // Change to button type to prevent form submission
+                  className="text-[#005294] text-[16px] font-medium  font-manrope leading-[150%] tracking-[-2%]  "
                 >
-                Forget Password?
-              </button>
-            </div>
-                </Link>
+                  Forget Password?
+                </button>
+              </div>
+            </Link>
           </div>
         </div>
 
@@ -175,13 +193,13 @@ export default function LoginPage() {
               src="/googleicon.png"
               alt="google"
               className="w-[24px] h-[24px]"
-              width={24} height={24}
+              width={24}
+              height={24}
             />
             <p className="text-[14px] font-medium  text-center text-[#00111F] ">
               Google
             </p>
           </Button>
-          
         </div>
         <div className="flex flex-col pb-1 items-center justify-center text-nowrap gap-2 md:gap-3  pt-5 xl:pt-[32px]">
           <div>
@@ -189,10 +207,8 @@ export default function LoginPage() {
               © 2024 Hey Dividend, LLC. All rights reserved.
             </p>
           </div>
-
-        
         </div>
       </div>
     </div>
-  )
+  );
 }

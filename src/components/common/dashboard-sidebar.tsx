@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { removeTokens } from "@/lib/auth";
 
 const navigationItems = [
   {
@@ -57,8 +58,9 @@ export default function DashBoardSideBar({ isMobile }: { isMobile?: Boolean }) {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Add your logout logic here
-    console.log("Logging out...");
+    removeTokens();
+    router.refresh();
+    router.push("/auth-sign-in");
   };
 
   const handleSettings = () => {
