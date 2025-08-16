@@ -24,6 +24,8 @@ const config: Config = {
       },
       colors: {
         primaryBlue: "#005294",
+        hoverBlue: "#003f73", // darker, richer shade
+
         mutedPrimary: "#8996A9",
         accentBase: "#005294",
         accentLight: "#1D2290",
