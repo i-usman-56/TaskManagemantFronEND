@@ -60,7 +60,7 @@ export default function DashBoardSideBar({ isMobile }: { isMobile?: Boolean }) {
   const handleLogout = () => {
     removeTokens();
     router.refresh();
-    router.push("/auth-sign-in");
+    router.push("/auth/sign-in");
   };
 
   const handleSettings = () => {
