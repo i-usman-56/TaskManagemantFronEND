@@ -39,7 +39,8 @@ export default function DashBoardLayout({
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <DashBoardSideBar />
+        <DashBoardSideBar accountType="organization" />
+        {/* <DashBoardSideBar accountType="individual" /> */}
       </div>
 
       {/* Mobile Sidebar */}
@@ -49,20 +50,30 @@ export default function DashBoardLayout({
         }`}
       >
         <div className="w-72 h-screen">
-          <DashBoardSideBar isMobile={true} />
+          <DashBoardSideBar isMobile={true} accountType="individual" />
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="h-[65px] flex items-center px-6 w-full border border-gray-200">
-            <div className="flex items-center gap-2">
-              <h1 className=" text-[16px] font-medium font-sfDisplay ">Hi, Muhammad Usman</h1>
-              <span className=" text-[16px] font-medium font-sfDisplay ">Welcome Back</span>
+      <div className="flex-1 overflow-hidden h-full">
+        {/* Dash Board Header  */}
+        <div className="h-[7.5%] flex items-center justify-between px-6 w-full border border-gray-200">
+          <div className="flex items-center gap-2">
+            <h1 className=" text-[16px] font-medium font-sfDisplay ">
+              Hi, Muhammad Usman
+            </h1>
+            <span className=" text-[16px] font-medium font-sfDisplay ">
+              Welcome Back
+            </span>
+          </div>
+          <div className="w-8 h-8">
+            <div className=" w-full h-full bg-primaryBlue rounded-full flex items-center content-center pt-0 justify-center text-white text-[24px] text-center">
+              +
             </div>
+          </div>
         </div>
         {/* Add top padding on mobile to account for the hamburger button */}
-        <div className="lg:p-0 overflow-auto lg:pt-0 h-full ">
+        <div className=" p-5 overflow-y-scroll h-[92.5%] custom-scrollbar-hide">
           {children}
         </div>
       </div>

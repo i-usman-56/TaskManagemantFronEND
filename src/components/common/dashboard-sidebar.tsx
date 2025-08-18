@@ -22,40 +22,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { removeTokens } from "@/lib/auth";
+import { getNavigationItems } from "@/config/navigation";
 
-const navigationItems = [
-  {
-    name: "Dividend Insights",
-    icon: TrendingUp,
-    active: true,
-  },
-  {
-    name: "Ask HeyDividend",
-    icon: MessageCircle,
-    active: false,
-  },
-  {
-    name: "Passive Income Tracker",
-    icon: Star,
-    active: false,
-  },
-  {
-    name: "Dividend Calendar",
-    icon: Calendar,
-    active: false,
-  },
-  {
-    name: "Dividend Education",
-    icon: GraduationCap,
-    active: false,
-  },
-];
-
-export default function DashBoardSideBar({ isMobile }: { isMobile?: Boolean }) {
+export default function DashBoardSideBar({
+  isMobile,
+  accountType,
+}: {
+  isMobile?: Boolean;
+  accountType: "individual" | "organization";
+}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const router = useRouter();
+
+  // dynamically load based on accountType
+  const navigationItems = getNavigationItems(accountType);
+  const pathname = usePathname(); // 👈 current route
 
   const handleLogout = () => {
     removeTokens();
@@ -122,13 +105,16 @@ export default function DashBoardSideBar({ isMobile }: { isMobile?: Boolean }) {
         <nav className="space-y-2">
           {navigationItems.map((item) => {
             const Icon = item.icon;
+            const isActive = pathname === item.route; // 👈 check current route
+
             return (
               <Button
                 key={item.name}
-                variant={item.active ? "default" : "ghost"}
+                variant={isActive ? "default" : "ghost"}
+                onClick={() => router.push(item.route)} // 👈 navigate
                 className={cn(
                   "w-full justify-start h-12 px-3",
-                  item.active
+                  isActive
                     ? "bg-primaryBlue text-white hover:bg-hoverBlue"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-100",
                   isCollapsed && "justify-center px-0"
