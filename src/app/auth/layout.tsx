@@ -2,7 +2,6 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 
 import VerifyWelcome from "@/components/common/welcome/VerifyWelcome";
 import SignupWelcome from "@/components/common/welcome/SignupWelcome";

@@ -175,7 +175,6 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
           Verify
         </button>
         <div className="flex items-center gap-3 my-1 mb-2">
-          {/* <p className="text-black text-sm font-inter">Need a new code?</p> */}
           <button
             type="button"
             disabled={isResendingOtp}

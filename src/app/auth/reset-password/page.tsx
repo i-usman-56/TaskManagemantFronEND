@@ -1,23 +1,24 @@
-"use client"
+"use client";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MdError } from "react-icons/md";
 import { IoMdCheckmark } from "react-icons/io";
-import { checkPasswordStrength } from "@/utils/password-strength"; 
-import { ResetPasswordFormValues, ResetPasswordSchema } from "@/types/auth/reset-password";
+import { checkPasswordStrength } from "@/utils/password-strength";
+import {
+  ResetPasswordFormValues,
+  ResetPasswordSchema,
+} from "@/types/auth/reset-password";
 import { useresetPasswordMutation } from "@/hooks/use-auth-mutations";
 import { useSearchParams } from "next/navigation";
 import { FiLoader } from "react-icons/fi";
 
 const ResetPasswordForm = () => {
-  const [loading, setLoading] = useState(false);
-  const searchParams = useSearchParams()
-  const token  = searchParams.get("token")||""
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") || "";
   const [showPassword, setShowPassword] = useState(false);
-    const resetPasswordMutation = useresetPasswordMutation()
-  
+  const resetPasswordMutation = useresetPasswordMutation();
 
   const [passwordStrength, setPasswordStrength] = useState({
     strength: "",
@@ -44,11 +45,10 @@ const ResetPasswordForm = () => {
     setPasswordStrength(strength);
   }, [password]);
   const handlePasswordReset = async (data: ResetPasswordFormValues) => {
-     resetPasswordMutation.mutate({
-      password:data.password,
-      token
-     })
-   
+    resetPasswordMutation.mutate({
+      password: data.password,
+      token,
+    });
   };
 
   const toggleShowPassword = () => {
@@ -169,9 +169,11 @@ const ResetPasswordForm = () => {
         <button
           type="submit"
           className="mt-6 flex items-center justify-center gap-2 bg-[#005294] hover:bg-[#0e68b3] text-white h-[44px] rounded-[12px] w-full font-medium text-[14px]  leading-[140%] font-sfDisplay  mb-5"
-          disabled={loading}
+          disabled={resetPasswordMutation.isLoading}
         >
-        {resetPasswordMutation.isLoading && <FiLoader className="animate-spin" />}
+          {resetPasswordMutation.isLoading && (
+            <FiLoader className="animate-spin" />
+          )}
 
           {resetPasswordMutation.isLoading ? "Resetting..." : "Reset Password"}
         </button>

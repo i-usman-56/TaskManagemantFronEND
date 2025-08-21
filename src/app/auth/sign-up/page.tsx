@@ -207,10 +207,6 @@ const SignUpFormWithPhone = () => {
     });
   };
 
-  // const handleGoogleLogin = () => {
-  //   router.push(`${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`)
-  //   // Google login logic
-  // }
   const handleGoogleLogin = () => {
     const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`;
     const popup = window.open(googleAuthUrl, "_blank", "width=500,height=600");

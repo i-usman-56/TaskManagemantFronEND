@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,8 +21,6 @@ import {
   User,
   ArrowRight,
   ArrowLeft,
-  Upload,
-  X,
 } from "lucide-react";
 import { useOnBoardingMutation } from "@/hooks/use-onboarding-mutation";
 import { FiLoader } from "react-icons/fi";
@@ -50,10 +47,7 @@ interface OrganizationData extends BaseOnboarding {
 type OnboardingData = IndividualData | OrganizationData;
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [logoPreview, setLogoPreview] = useState<string>("");
-  const [logoFile, setLogoFile] = useState<File | null>(null);
   const OnboardingMutaion = useOnBoardingMutation();
 
   const [accountType, setAccountType] = useState<
@@ -76,25 +70,7 @@ export default function OnboardingPage() {
       handleComplete();
     }
   };
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        setLogoPreview(result);
-        setOrganizationData({ ...organizationData, logo: result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveLogo = () => {
-    setLogoFile(null);
-    setLogoPreview("");
-    setOrganizationData({ ...organizationData, logo: "" });
-  };
+  
 
   const handleBack = () => {
     if (currentStep > 1) {
@@ -349,52 +325,6 @@ export default function OnboardingPage() {
             </h2>
             <p className="text-gray-600">Tell us about your organization</p>
           </div>
-
-          {/* <div className="space-y-2">
-            <Label htmlFor="logoUpload">Organization Logo</Label>
-            <div className="flex items-center space-x-4">
-              {logoPreview ? (
-                <div className="relative">
-                  <img
-                    src={logoPreview || "/placeholder.svg"}
-                    alt="Logo preview"
-                    className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemoveLogo}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ) : (
-                <div className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                  <Upload className="h-8 w-8 text-gray-400" />
-                </div>
-              )}
-              <div className="flex-1">
-                <input
-                  id="logoUpload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById("logoUpload")?.click()}
-                  className="w-full"
-                >
-                  {logoPreview ? "Change Logo" : "Upload Logo"}
-                </Button>
-                <p className="text-xs text-gray-500 mt-1">
-                  Recommended: Square image, max 2MB
-                </p>
-              </div>
-            </div>
-          </div> */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="orgName">Organization Name</Label>
@@ -532,7 +462,7 @@ export default function OnboardingPage() {
 
             <Button
               onClick={handleNext}
-              // disabled={!canProceed()}
+              disabled={!canProceed()}
               className="flex items-center space-x-2 text-white bg-primaryBlue hover:bg-primaryBlue"
             >
               <span className=" flex items-center gap-1">

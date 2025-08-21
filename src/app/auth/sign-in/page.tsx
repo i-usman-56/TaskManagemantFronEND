@@ -7,7 +7,6 @@ import { FiLoader } from "react-icons/fi";
 import { MdError } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { toast } from "react-toastify";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Link from "next/link";
 import { SignInFormValues, signInSchema } from "@/types/auth/login";
@@ -26,11 +25,6 @@ export default function LoginPage() {
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
   });
-
-  // const handleGoogleLogin = () => {
-  //   router.push(`${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`)
-  //   // Google login logic
-  // }
   const handleGoogleLogin = () => {
     const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_HOST}/api/auth/google`;
     const popup = window.open(googleAuthUrl, "_blank", "width=500,height=600");
@@ -177,11 +171,9 @@ export default function LoginPage() {
 
       <div className="w-full  mt-4  text-[#D9D9D9]">
         <div className="flex items-center w-full  justify-center gap-3 mb-5">
-          {/* <hr className="flex-1 bg-[#D9D9D9]" /> */}
           <p className="text-[14px] font-normal font-sfDisplay leading-[140%] space-y-[14px] text-[#64748B]  ">
             or
           </p>
-          {/* <hr className="flex-1 bg-[#D9D9D9]" /> */}
         </div>
         <div className=" w-full ">
           <Button

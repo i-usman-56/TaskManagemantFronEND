@@ -12,7 +12,6 @@ export default function AccountInformation() {
         <Loader className="animate-spin" />
       </div>
     );
-  // console.log(data);
   return (
     <div className="flex flex-col gap-4">
       <PersonalInformation
