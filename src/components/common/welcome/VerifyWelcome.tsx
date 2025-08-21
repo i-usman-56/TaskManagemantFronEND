@@ -13,7 +13,7 @@ const VerifyWelcome = () => {
   return (
     <div className="bg-primaryBlue h-full flex flex-col  pt-[75px] lg:pt-[70px] xl:pt-[125px] 2xl:pt-[145px] rounded-3xl max-w-4xl w-full text-white shadow-lg">
       <h1 className="lg:text-[35px] text-[25px] font-medium text-center text-white">
-        Welcome to HeyDIvidend
+        Welcome to TMS
       </h1>
       <p className="text-center mb-2 text-[12px] lg:text-[14px] text-[#B8DFFF]">Finish Account Setup</p>
 
@@ -31,7 +31,6 @@ const VerifyWelcome = () => {
             </div>
           </div>
         ))}
-        {/* <img src="/GuardIcon.png" className="mx-auto w-[220px]" alt="" /> */}
       </div>
     </div>
   );

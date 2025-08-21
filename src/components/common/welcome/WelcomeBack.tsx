@@ -6,24 +6,24 @@ import Image from "next/image";
 const list = [
   {
     icon: firrbag,
-    heading: "Dividend Portfolio Management",
+    heading: "Simple Task Management",
     paragraph:
-      "Integrate with guaranteed developer-friendly APIs or openly to choose a build-ready or low-code solution.",
+      "Easily create and manage tasks without complexity.",
   },
   {
     icon: firrbag1,
-    heading: "Ask Hey Dividend",
+    heading: "Team Organization",
     paragraph:
-      "Keep your team members and customers in the loop by sharing your dashboard public.",
+      "Assign tasks and keep your team organized and productive.",
   },
   {
     icon: firrbag2,
-    heading: "Portfolio Analysis",
+    heading: "Secure & Reliable",
     paragraph:
-      "Receive detailed insights on all your numbers in real-time, see where visitors are coming from.",
+      "Your tasks and data are stored safely with secure access.",
   },
-
 ];
+
 
 const WelcomeBack = () => {
   return (
