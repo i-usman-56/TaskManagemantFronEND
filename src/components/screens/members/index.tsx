@@ -276,12 +276,12 @@ export default function MemberScreen() {
       <div className="">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center lg:gap-3">
             <div className="p-2 bg-primary/10 rounded-lg">
               <Users className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="lg:text-3xl font-bold text-foreground">
                 Team Members
               </h1>
               <p className="text-muted-foreground">
@@ -298,7 +298,7 @@ export default function MemberScreen() {
               </Button>
             </SheetTrigger>
 
-            <SheetContent className="bg-white">
+            <SheetContent className="bg-white w-full lg:w-[40%]">
               <SheetHeader>
                 <SheetTitle>Add New Member</SheetTitle>
                 <SheetDescription>
@@ -466,7 +466,7 @@ export default function MemberScreen() {
 
         {/* Edit Sheet */}
         <Sheet open={isEditSheetOpen} onOpenChange={handleEditSheetOpenChange}>
-          <SheetContent className="bg-white">
+          <SheetContent className="bg-white w-full lg:w-[40%]">
             <SheetHeader>
               <SheetTitle>Edit Member</SheetTitle>
               <SheetDescription>

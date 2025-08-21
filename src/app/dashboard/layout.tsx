@@ -65,7 +65,7 @@ export default function DashBoardLayout({
       <div className="flex-1 overflow-hidden h-full">
         {/* Dash Board Header  */}
         <div className="h-[7.5%] flex items-center justify-between px-6 w-full border border-gray-200">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mr-3 mt-2">
             <h1 className=" text-[16px] font-medium font-sfDisplay ">
               Hi, Muhammad Usman
             </h1>
@@ -73,11 +73,11 @@ export default function DashBoardLayout({
               Welcome Back
             </span>
           </div>
-          <div className="w-8 h-8">
+          {/* <div className="w-8 h-8">
             <div className=" w-full h-full bg-primaryBlue rounded-full flex items-center content-center pt-0 justify-center text-white text-[24px] text-center">
               +
             </div>
-          </div>
+          </div> */}
         </div>
         {/* Add top padding on mobile to account for the hamburger button */}
         <div className=" p-5 overflow-y-scroll h-[92.5%] custom-scrollbar-hide">

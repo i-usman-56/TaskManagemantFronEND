@@ -408,7 +408,7 @@ export default function AllTaskScreen() {
                 Add Task
               </Button>
             </SheetTrigger>
-            <SheetContent className="bg-white overflow-y-scroll">
+            <SheetContent className="bg-white overflow-y-scroll w-full lg:w-[40%]">
               <SheetHeader>
                 <SheetTitle>Add New Task</SheetTitle>
                 <SheetDescription>Create a new personal task</SheetDescription>
@@ -942,7 +942,7 @@ export default function AllTaskScreen() {
 
       {/* Edit Task Sheet */}
       <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
-        <SheetContent className="bg-white overflow-y-scroll">
+        <SheetContent className="bg-white overflow-y-scroll w-full lg:w-[40%]">
           <SheetHeader>
             <SheetTitle>Edit Task</SheetTitle>
             <SheetDescription>Update task details</SheetDescription>

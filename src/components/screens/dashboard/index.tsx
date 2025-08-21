@@ -23,6 +23,7 @@ import {
   useDashBoardTodayQuery,
 } from "@/hooks/use-task-hook";
 import { useRouter } from "next/navigation";
+import { useAccountTypeQuery } from "@/hooks/use-auth-mutations";
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
@@ -120,11 +121,15 @@ const CalendarSkeleton = () => (
 
 export default function DashBoardScreen() {
   const router = useRouter();
+  const { data } = useAccountTypeQuery();
+
   const [currentDate, setCurrentDate] = useState(new Date());
-  
-  const { data: DashBoardData, isLoading: isDashboardLoading } = useDashBoardStateQuery();
-  const { data: DashBoardDataToday, isLoading: isTodayLoading } = useDashBoardTodayQuery();
-  
+
+  const { data: DashBoardData, isLoading: isDashboardLoading } =
+    useDashBoardStateQuery();
+  const { data: DashBoardDataToday, isLoading: isTodayLoading } =
+    useDashBoardTodayQuery();
+
   console.log(DashBoardDataToday);
 
   const { data: calendarData, isLoading: isCalendarLoading } = useCalenderQuery(
@@ -355,7 +360,11 @@ export default function DashBoardScreen() {
                     DashBoardDataToday.task.map((task) => (
                       <div
                         key={task._id}
-                        onClick={() => router.push("/dashboard/all-task")}
+                        onClick={() => {
+                          data?.accountType === "organization"
+                            ? router.push("/dashboard/all-task")
+                            : router.push("/dashboard/my-task");
+                        }}
                         className="flex items-center justify-between cursor-pointer p-4 bg-white border rounded-lg hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-center gap-4 flex-1">
@@ -389,10 +398,11 @@ export default function DashBoardScreen() {
                 </div>
               </CardContent>
             </Card>
+            
           </div>
 
           {/* Calendar with Skeleton Loading */}
-          <div className="w-80 sticky top-6 h-fit">
+          <div className="w-80 sticky top-6 h-fit hidden lg:block">
             {isCalendarLoading ? (
               <CalendarSkeleton />
             ) : (
