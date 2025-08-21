@@ -22,7 +22,26 @@ import { useRouter } from "next/navigation";
 // Extended schema with phone validation
 const registerSchema = z
   .object({
-    username: z.string().min(1, "Username is required"),
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters")
+      .max(20, "Username must be less than 20 characters")
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores"
+      )
+      .refine((val) => !val.includes("-"), {
+        message: "Username cannot contain hyphens (-)",
+      })
+      .refine((val) => !/^[0-9]/.test(val), {
+        message: "Username cannot start with a number",
+      })
+      .refine((val) => !val.startsWith("_"), {
+        message: "Username cannot start with underscore",
+      })
+      .refine((val) => !val.endsWith("_"), {
+        message: "Username cannot end with underscore",
+      }),
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Invalid email address"),
@@ -197,7 +216,7 @@ const SignUpFormWithPhone = () => {
     const popup = window.open(googleAuthUrl, "_blank", "width=500,height=600");
 
     window.addEventListener("message", (event) => {
-      console.log("insode")
+      console.log("insode");
       // Security check
       if (event.origin !== process.env.NEXT_PUBLIC_API_HOST) return;
 

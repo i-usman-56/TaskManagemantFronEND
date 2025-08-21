@@ -21,7 +21,6 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { setTokens } from "@/lib/auth";
-
 export function useRegisterMutation() {
   const router = useRouter();
   return useMutation({
