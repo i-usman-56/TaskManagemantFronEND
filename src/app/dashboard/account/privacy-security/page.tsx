@@ -1,8 +1,8 @@
-"use client"
+"use client";
 import { useEffect, useRef, useState } from "react";
-import { CiMail } from "react-icons/ci";
-import { BiPhone } from "react-icons/bi";
-import { Loader, AlertTriangle, X, AlertCircle } from "lucide-react";
+import type React from "react";
+
+import { Loader, AlertTriangle, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 import {
@@ -14,19 +14,28 @@ import {
 import toast from "react-hot-toast";
 import { Switch } from "@/components/ui/switch";
 import { FiLoader } from "react-icons/fi";
+import {
+  usedeleteAccountMutation,
+  useenable2faMutation,
+  useresend2faMutation,
+  useUpdatePasswordMutation,
+  useUserInfoQuery,
+  useverify2faMutation,
+} from "@/hooks/use-auth-mutations";
+import { removeTokens } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export default function PrivacySecurity() {
-
-  // const [email, setEmail] = useState("");
-  // const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const router = useRouter();
+
   const [phone, setPhone] = useState("");
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [verificationMethod, setVerificationMethod] = useState<
     "email" | "phone"
   >("email");
-  const [otpValues, setOtpValues] = useState(["", "", "", ""]);
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
   const [otpError, setOtpError] = useState("");
   const [otpSuccess, setOtpSuccess] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -37,7 +46,16 @@ export default function PrivacySecurity() {
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
   ];
+
+  const updatePasswordMutation = useUpdatePasswordMutation();
+  const deleteAccountmutaion = usedeleteAccountMutation();
+  const enable2faMutation = useenable2faMutation();
+  const verify2faMutation = useverify2faMutation();
+  const resend2faMutation = useresend2faMutation();
+  const { data: userData } = useUserInfoQuery();
   const validateEmail = (email: string) => {
     if (!email && twoFactorEnabled) {
       setEmailError("Email is required when 2FA is enabled");
@@ -51,7 +69,6 @@ export default function PrivacySecurity() {
     }
   };
 
-  // Validate phone format
   const validatePhone = (phone: string) => {
     if (!phone && twoFactorEnabled && !email) {
       setPhoneError("At least one verification method is required");
@@ -64,7 +81,7 @@ export default function PrivacySecurity() {
       return true;
     }
   };
-  // Validate form before submission
+
   const validateForm = () => {
     const isEmailValid = validateEmail(email);
     const isPhoneValid = validatePhone(phone);
@@ -82,85 +99,76 @@ export default function PrivacySecurity() {
   const [shownewPassword, setShowNewPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showconfirmPassword, setShowConfirmPassword] = useState(false);
-  // const [email, setEmail] = useState("");
-  // const [phone, setPhone] = useState("");
   const [deletePassword, setDeletePassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
-  // useEffect(() => {
-  //   if (data) {
-  //     setTwoFactorEnabled(data.twoFactorEnabled || false);
-  //     setEmail(data.twoFactoremail || "");
-  //     setPhone(data.twoFactorphone || "");
-  //   }
-  // }, [data]);
-  // const handleDiscard = () => {
-  //   // Reset form values
-  //   if (data) {
-  //     setEmail(data.twoFactoremail || "");
-  //     setPhone(data.twoFactorphone || "");
-  //   }
-  // };
 
-  // const handleSave = () => {
-  //   if (newPassword !== confirmPassword) {
-  //     return toast.error("Password do match");
-  //   }
-  //   mutate(
-  //     {
-  //       oldPassword: currentPassword,
-  //       newPassword: newPassword,
-  //       twoFactorphone: phone,
-  //       twoFactoremail: email,
-  //     },
-  //     {
-  //       onSuccess: (data) => {
-  //         setNewPassword("");
-  //         setCurrentPassword("");
-  //         setConfirmPassword("");
-  //       },
-  //     }
-  //   );
-  //   // Save form values
-  // };
+  const handleUpdatePassword = () => {
+    if (newPassword !== confirmPassword) {
+      return toast.error("Passwords do not match");
+    }
+    updatePasswordMutation.mutate(
+      {
+        newPassword,
+        oldPassword: currentPassword,
+      },
+      {
+        onSuccess: () => {
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        },
+      }
+    );
+  };
 
-  // const handleSave1 = () => {
-  //   if (!validateForm()) return;
-  //   if (!twoFactorEnabled) {
-  //     return mutatedisbale2fa();
-  //   }
+  const handleVerifyOtp = () => {
+    const otp = otpValues.join("");
+    setOtpError("");
+    setOtpSuccess(false);
 
-  //   if (email) {
-  //     setVerificationMethod("email");
-  //   } else if (phone) {
-  //     setVerificationMethod("phone");
-  //   } else {
-  //     // No verification method provided
-  //     return;
-  //   }
-  //   mutate2fa(
-  //     {
-  //       twoFactoremail: email,
-  //       twoFactorphone: phone,
-  //       twoFactorMethod: verificationMethod,
-  //     },
-  //     {
-  //       onSuccess: () => {
-  //         setTimeout(() => {
-  //           setIsVerifyModalOpen(true);
-  //         }, 1000);
-  //       },
-  //     }
-  //   );
-  // };
+    if (otp.length !== 6) {
+      setOtpError("Please enter all 6 digits");
+      return;
+    }
 
-  // const handleDiscard1 = () => {
-  //   setEmail(data.twoFactoremail || "");
-  //   setPhone(data.twoFactorphone || "");
-  //   setTwoFactorEnabled(data.twoFactorEnabled || false);
-  // };
+    verify2faMutation.mutate(
+      { otp },
+      {
+        onSuccess: () => {
+          setOtpSuccess(true);
+          setResendTimer(0);
+
+          setTimeout(() => {
+            setIsVerifyModalOpen(false);
+            setOtpValues(["", "", "", "", "", ""]);
+          }, 1000);
+        },
+        onError: (error: any) => {
+          setOtpError(error.message || "Verification failed");
+        },
+      }
+    );
+  };
+
+  const handleResendVerifyOTP = () => {
+    resend2faMutation.mutate(undefined, {
+      onSuccess: () => {
+        setResendTimer(30);
+      },
+    });
+  };
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setTimeout(() => {
+        setResendTimer(resendTimer - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendTimer]);
 
   const handleOtpChange = (index: number, value: string) => {
     // Only allow digits
@@ -174,11 +182,11 @@ export default function PrivacySecurity() {
     setOtpError("");
     setOtpSuccess(false);
 
-    // Auto-advance to next input
-    if (value !== "" && index < 3) {
+    if (value !== "" && index < 5) {
       inputRefs[index + 1].current?.focus();
     }
   };
+
   const handleKeyDown = (
     index: number,
     e: React.KeyboardEvent<HTMLInputElement>
@@ -188,66 +196,7 @@ export default function PrivacySecurity() {
       inputRefs[index - 1].current?.focus();
     }
   };
-  const handleRsendVerifyOTP = () => {
-    const tokenId = localStorage.getItem("tokenId");
 
-    // mutate2faresendOTP(
-    //   {
-    //     tokenId: tokenId,
-    //   },
-    //   {
-    //     onSuccess: () => {
-    //       setResendTimer(30); // Start 30 second countdown
-    //     },
-    //   }
-    // );
-  };
-  // const handleVerifyOtp = () => {
-  //   const otp = otpValues.join("");
-  //   // Reset states
-  //   setOtpError("");
-  //   setOtpSuccess(false);
-  //   // Validate OTP
-  //   if (otp.length !== 4) {
-  //     setOtpError("Please enter all 4 digits");
-  //     return;
-  //   }
-  //   const tokenId = localStorage.getItem("tokenId");
-  //   // Simulate OTP verification
-  //   if (otp.length === 4) {
-  //     mutate2faOTP(
-  //       {
-  //         tokenId: tokenId,
-  //         code: otp,
-  //       },
-  //       {
-  //         onSuccess: () => {
-  //           // Success
-  //           setOtpSuccess(true);
-  //           setResendTimer(0); // Reset timer on success
-
-  //           // Close modal after success
-  //           setTimeout(() => {
-  //             setIsVerifyModalOpen(false);
-  //             // Reset OTP values
-  //             setOtpValues(["", "", "", ""]);
-  //           }, 1000);
-  //         },
-  //         onError: (err) => {
-  //           setOtpError(err.message);
-  //         },
-  //       }
-  //     );
-  //   }
-  // };
-
-  // Focus first input when modal opens
-  useEffect(() => {
-    if (isVerifyModalOpen) {
-      inputRefs[0].current?.focus();
-    }
-  }, [isVerifyModalOpen]);
-  // Focus first input when modal opens
   useEffect(() => {
     if (isVerifyModalOpen) {
       inputRefs[0].current?.focus();
@@ -256,7 +205,6 @@ export default function PrivacySecurity() {
     }
   }, [isVerifyModalOpen]);
 
-  // Validate email and phone when they change
   useEffect(() => {
     if (email) validateEmail(email);
   }, [email]);
@@ -265,55 +213,61 @@ export default function PrivacySecurity() {
     if (phone) validatePhone(phone);
   }, [phone]);
 
-  // Clear API error when form changes
   useEffect(() => {
     setApiError("");
   }, [email, phone, twoFactorEnabled]);
+
   const handleDelete = () => {
     if (!deletePassword) {
       return toast.error("Please Confirm Password!");
     }
-    // Show the delete confirmation modal
     setShowDeleteModal(true);
   };
 
   const handleConfirmDelete = () => {
-    // Check if confirmation text is correct
     if (deleteConfirmText.toLowerCase() === "delete") {
-      // deleteMutate(
-      //   { password: deletePassword },
-      //   {
-      //     onSuccess: () => {
-      //       setDeletePassword("");
-      //       setShowDeleteModal(false);
-      //     },
-      //     onError: () => {
-      //       setShowDeleteModal(false);
-      //     },
-      //   }
-      // );
-      // setIsLoading(true);
-      // // Simulate API call
-      // setTimeout(() => {
-      //   setIsLoading(false);
-      //   setShowDeleteModal(false);
-      //   // Reset confirmation text
-      //   setDeleteConfirmText("");
-      // }, 1000);
+      setIsLoading(true);
+      deleteAccountmutaion.mutate(undefined, {
+        onSuccess: () => {
+          setTimeout(() => {
+            setIsLoading(false);
+            setShowDeleteModal(false);
+            setDeleteConfirmText("");
+            handleLogout();
+          }, 1000);
+        },
+      });
     }
+  };
+  const handleLogout = () => {
+    removeTokens();
+    router.refresh();
+    router.push("/auth/sign-in");
   };
 
   const handleCloseModal = () => {
     setShowDeleteModal(false);
     setDeleteConfirmText("");
   };
-
-  // if (PrivacyLoading)
-  //   return (
-  //     <div className="flex items-center justify-center border border-gray-100 rounded-lg min-h-[60vh] sm:max-w-[90%] md:max-w-[80%]">
-  //       <Loader className="animate-spin" />
-  //     </div>
-  //   );
+  const handleToggle2FA = (type: "email" | "sms", enabled: boolean) => {
+    enable2faMutation.mutate(
+      { channel: type, disabled: enabled ? false : true },
+      {
+        onSuccess: (data) => {
+          if (!data.disabled) {
+            setTimeout(() => {
+              setIsVerifyModalOpen(true);
+            }, 1000);
+          }
+        },
+        onError: (err: any) => {
+          toast.error(
+            err?.response?.data?.message || "Failed to update 2FA setting"
+          );
+        },
+      }
+    );
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -441,315 +395,175 @@ export default function PrivacySecurity() {
               </div>
             </div>
           </div>
-
-          {/* 2FA */}
-          {/* <div className="flex flex-col md:flex-row md:items-start gap-2">
-            <label className="text-[14px] font-medium font-sfDisplay leading-[140%] text-[#0F172A] md:w-1/4 md:pt-2">
-              2FA
-            </label>
-            <div className="w-full md:w-3/4 space-y-4">
-              <div className="w-full">
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3 py-3 border border-gray-300 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter a second email address to secure your account"
-                  />
-                  <div className="absolute inset-y-0 left-3 flex items-center">
-                    <CiMail className="text-gray-400" size={16} />
-                  </div>
-                </div>
-                <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#94A3B8] mt-1 pl-2">
-                  Enter a second email address to secure your account.
-                </p>
-              </div>
-
-              <div className="w-full">
-                <div className="relative">
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-9 pr-3 py-3 border border-gray-300 rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your phone number to secure your account"
-                  />
-                  <div className="absolute inset-y-0 left-3 flex items-center">
-                    <BiPhone className="text-gray-400" size={16} />
-                  </div>
-                </div>
-                <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#94A3B8] mt-1 pl-2">
-                  Enter your phone number to secure your account.
-                </p>
-              </div>
-            </div>
-          </div> */}
         </div>
 
         {/* Buttons */}
         <div className="px-6 py-4 flex flex-col sm:flex-row sm:justify-end gap-3">
           <button
-            // onClick={handleDiscard}
+            onClick={() => {
+              setCurrentPassword("");
+              setNewPassword("");
+              setConfirmPassword("");
+            }}
             className="px-4 py-3 text-[14px] font-medium font-sfDisplay leading-[140%] text-[#0F172A] bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
           >
             Discard
           </button>
           <button
-            // onClick={handleSave}
-            // disabled={isPending}
-            className="px-4 py-3 text-[14px] font-medium font-sfDisplay leading-[140%]  text-white bg-[#005294] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-1 w-full sm:w-auto"
+            onClick={handleUpdatePassword}
+            disabled={updatePasswordMutation.isPending}
+            className="px-4 py-3 text-[14px] font-medium font-sfDisplay leading-[140%]  text-white bg-[#005294] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-1 w-full sm:w-auto disabled:opacity-50"
           >
-            {/* {isPending && (
+            {updatePasswordMutation.isPending && (
               <Loader className="animate-spin mr-2 inline" size={14} />
-            )} */}
+            )}
             Save
           </button>
         </div>
       </div>
-      {/* Enable 2FA Card  */}
-      <>
-        <div className="border border-gray-200 rounded-lg w-full max-w-full sm:max-w-[90%] md:max-w-[70%]">
-          <div className="p-6">
-            <h2 className="text-[17px] font-medium font-sfDisplay leading-[140%] text-[#0F172A]">
-              Two Factor Authorization
-            </h2>
-          </div>
 
-          <div className="px-6 pb-6 space-y-6">
-            {/* 2FA Toggle */}
-            <div className="flex flex-col md:flex-row md:items-start gap-2">
-              <label className="text-[14px] font-medium font-sfDisplay leading-[140%] text-[#0F172A] md:w-1/4 md:pt-2">
-                2FA
-              </label>
-              <div className="w-full md:w-3/4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label
-                      htmlFor="two-factor"
-                      className="text-[14px] font-medium font-sfDisplay leading-[140%] text-[#0F172A] md:w-1/4 md:pt-2"
-                    >
-                      Enable Two-Factor Authentication
-                    </Label>
-                    <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#64748B] mt-1">
-                      Add an extra layer of security to your account
-                    </p>
-                  </div>
-                  <Switch
-                    id="two-factor"
-                    className="data-[state=checked]:bg-[#00529466] [&>span]:bg-[#005294]"
-                    checked={twoFactorEnabled}
-                    onCheckedChange={setTwoFactorEnabled}
-                  />
-                </div>
-
-                {/* 2FA Fields (only shown when enabled) */}
-                {twoFactorEnabled && (
-                  <div className="space-y-4 mt-4">
-                    {/* Email 2FA */}
-                    <div className="w-full">
-                      <div className="relative">
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          onBlur={() => validateEmail(email)}
-                          className={`w-full pl-9 pr-3 py-3 border ${
-                            emailError
-                              ? "border-red-500 focus:ring-red-500"
-                              : "border-gray-300 focus:ring-blue-500"
-                          } rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:border-transparent`}
-                          placeholder="Enter a second email address to secure your account"
-                        />
-                        <div className="absolute inset-y-0 left-3 flex items-center">
-                          <CiMail
-                            className={
-                              emailError ? "text-red-400" : "text-gray-400"
-                            }
-                            size={16}
-                          />
-                        </div>
-                      </div>
-                      {emailError ? (
-                        <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-red-500 mt-1 pl-2">
-                          {emailError}
-                        </p>
-                      ) : (
-                        <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#94A3B8] mt-1 pl-2">
-                          Enter a second email address to secure your account.
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Phone 2FA */}
-                    <div className="w-full">
-                      <div className="relative">
-                        <input
-                          type="tel"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          onBlur={() => validatePhone(phone)}
-                          className={`w-full pl-9 pr-3 py-3 border ${
-                            phoneError
-                              ? "border-red-500 focus:ring-red-500"
-                              : "border-gray-300 focus:ring-blue-500"
-                          } rounded-xl text-[14px] focus:outline-none focus:ring-2 focus:border-transparent`}
-                          placeholder="Enter your phone number to secure your account"
-                        />
-                        <div className="absolute inset-y-0 left-3 flex items-center">
-                          <BiPhone
-                            className={
-                              phoneError ? "text-red-400" : "text-gray-400"
-                            }
-                            size={16}
-                          />
-                        </div>
-                      </div>
-                      {phoneError ? (
-                        <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-red-500 mt-1 pl-2">
-                          {phoneError}
-                        </p>
-                      ) : (
-                        <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#94A3B8] mt-1 pl-2">
-                          Enter your phone number to secure your account.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="px-6 py-4 flex flex-col sm:flex-row sm:justify-end gap-3">
-            <button
-              // onClick={handleDiscard1}
-              className="px-4 py-3 text-[14px] font-medium font-sfDisplay leading-[140%] text-[#0F172A] bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-auto"
-            >
-              Discard
-            </button>
-            <button
-              // onClick={handleSave1}
-              // disabled={enable2faPending || disable2faPending}
-              className="px-4 py-3 text-[14px] font-medium font-sfDisplay leading-[140%] text-white bg-[#005294] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-1 w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {/* {disable2faPending && (
-                <Loader className="animate-spin mr-2 inline" size={14} />
-              )}
-              {enable2faPending && (
-                <Loader className="animate-spin mr-2 inline" size={14} />
-              )} */}
-              {twoFactorEnabled ? "Save" : "Save"}
-            </button>
-          </div>
+      {/* Enable 2FA Card */}
+      <div className="border border-gray-200 rounded-lg w-full max-w-full sm:max-w-[90%] md:max-w-[70%]">
+        <div className="p-6">
+          <h2 className="text-[17px] font-medium font-sfDisplay leading-[140%] text-[#0F172A]">
+            Two Factor Authentication
+          </h2>
         </div>
 
-        {/* OTP Verification Modal */}
-        <Dialog open={isVerifyModalOpen} onOpenChange={setIsVerifyModalOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-center">
-                OTP Confirmation
-              </DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col items-center space-y-3">
-              <p className="text-center text-gray-600">
-                We have sent the verification code to your{" "}
-                {verificationMethod === "email"
-                  ? "Email Address"
-                  : "Phone Number"}
-                :{" "}
-                <span className="font-medium">
-                  {verificationMethod === "email" ? email : phone}
-                </span>
+        <div className="px-6 pb-6 space-y-6">
+          {/* Email 2FA Toggle */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label
+                htmlFor="email-2fa"
+                className="text-[14px] font-medium font-sfDisplay leading-[140%] text-[#0F172A]"
+              >
+                Email Two-Factor Authentication
+              </Label>
+              <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#64748B]">
+                Require email verification when logging in
               </p>
+            </div>
+            <Switch
+              id="email-2fa"
+              className="data-[state=checked]:bg-[#00529466] [&>span]:bg-[#005294]"
+              checked={userData?.user?.email2fa ?? false}
+              onCheckedChange={(checked) => handleToggle2FA("email", checked)}
+            />
+          </div>
 
-              <div className="flex gap-2">
-                {otpValues.map((value, index) => (
-                  <input
-                    key={index}
-                    ref={inputRefs[index]}
-                    type="text"
-                    maxLength={1}
-                    value={value}
-                    onChange={(e) => handleOtpChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    className={`w-14 h-14 text-center text-xl border ${
-                      otpError
-                        ? "border-red-500 focus:ring-red-500"
-                        : otpSuccess
-                        ? "border-green-500 focus:ring-green-500"
-                        : "border-gray-300 focus:ring-blue-500"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:border-transparent`}
-                  />
-                ))}
-              </div>
+          {/* Phone 2FA Toggle */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label
+                htmlFor="phone-2fa"
+                className="text-[14px] font-medium font-sfDisplay leading-[140%] text-[#0F172A]"
+              >
+                Phone Two-Factor Authentication
+              </Label>
+              <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#64748B]">
+                Require phone verification when logging in
+              </p>
+            </div>
+            <Switch
+              id="phone-2fa"
+              className="data-[state=checked]:bg-[#00529466] [&>span]:bg-[#005294]"
+              checked={userData?.user?.phone2fa ?? false}
+              onCheckedChange={(checked) => handleToggle2FA("sms", checked)}
+            />
+          </div>
+        </div>
+      </div>
 
-              {/* OTP Error Message */}
-              {otpError && (
-                <div className="flex items-center gap-2 text-red-500 text-sm">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{otpError}</span>
-                </div>
-              )}
+      {/* OTP Verification Modal */}
+      <Dialog open={isVerifyModalOpen} onOpenChange={setIsVerifyModalOpen}>
+        <DialogContent className="sm:max-w-md bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-center">OTP Confirmation</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-3">
+            <p className="text-center text-gray-600">
+              We have sent the verification code to your{" "}
+              {verificationMethod === "email"
+                ? "Email Address"
+                : "Phone Number"}
+              :{" "}
+              <span className="font-medium">
+                {verificationMethod === "email" ? email : phone}
+              </span>
+            </p>
 
-              {/* OTP Success Message */}
-              {otpSuccess && (
-                <p className="text-green-500 text-sm">
-                  Verification successful!
+            <div className="flex gap-2">
+              {otpValues.map((value, index) => (
+                <input
+                  key={index}
+                  ref={inputRefs[index]}
+                  type="text"
+                  maxLength={1}
+                  value={value}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(index, e)}
+                  className={`w-12 h-12 text-center text-xl border ${
+                    otpError
+                      ? "border-red-500 focus:ring-red-500"
+                      : otpSuccess
+                      ? "border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  } rounded-lg focus:outline-none focus:ring-2 focus:border-transparent`}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              disabled={
+                resendTimer > 0 || otpSuccess || resend2faMutation.isPending
+              }
+              className={`text-sm font-semibold ${
+                resend2faMutation.isPending || resendTimer > 0 || otpSuccess
+                  ? "text-[#64748B] cursor-not-allowed"
+                  : "text-[#005294] cursor-pointer hover:underline"
+              }`}
+              onClick={handleResendVerifyOTP}
+            >
+              {resend2faMutation.isPending ? (
+                <p className="text-[#64748B] font-medium flex font-sfDisplay items-center justify-center gap-1">
+                  <FiLoader className="animate-spin" /> Resending
+                </p>
+              ) : resendTimer > 0 ? (
+                <p className="text-[#64748B] leading-[140%] font-sfDisplay font-medium text-[14px] mt-5">
+                  Resend in {resendTimer}s
+                </p>
+              ) : (
+                <p className="text-[#005294] leading-[140%] font-sfDisplay font-medium text-[14px] mt-5">
+                  Resend new Code
                 </p>
               )}
-              <button
-                type="button"
-                // disabled={resendTimer > 0 || otpSuccess}
-                // className={`text-sm font-semibold 
-                //   ${
-                //   isResendingOtp || resendTimer > 0 || otpSuccess
-                //     ? "text-[#64748B] cursor-not-allowed"
-                //     : "text-[#005294] cursor-pointer"
-                // }
-                // `}
-                onClick={handleRsendVerifyOTP}
-              >
-                {/* {isResendingOtp ? (
-                  <p className="text-[#64748B] font-medium flex font-sfDisplay items-center justify-center gap-1">
-                    {isResendingOtp && <FiLoader className="animate-spin" />}{" "}
-                    Resending
-                  </p>
-                ) : resendTimer > 0 ? (
-                  <p className="text-[#64748B] leading-[140%] font-sfDisplay font-medium text-[14px] mt-5">
-                    Resend in {resendTimer}s
-                  </p>
-                ) : (
-                  <p className="hover:underline text-[#64748B] leading-[140%] font-sfDisplay font-medium text-[14px] mt-5">
-                    Resend new Code
-                  </p>
-                )} */}
-              </button>
+            </button>
 
-              <div className="flex flex-col w-full gap-2">
-                <button
-                  // onClick={handleVerifyOtp}
-                  // disabled={otpValues.some((v) => v === "") || verify2faPending}
-                  className="w-full px-4 py-3 text-white bg-[#005294] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {/* {verify2faPending && (
-                    <Loader className="animate-spin mr-2 inline" size={14} />
-                  )} */}
-                  Verify
-                </button>
-                <button
-                  onClick={() => setIsVerifyModalOpen(false)}
-                  className="w-full px-4 py-3 text-[#0F172A] bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  Cancel
-                </button>
-              </div>
+            <div className="flex flex-col w-full gap-2">
+              <button
+                onClick={handleVerifyOtp}
+                disabled={
+                  otpValues.some((v) => v === "") || verify2faMutation.isPending
+                }
+                className="w-full px-4 py-3 text-white bg-[#005294] rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {verify2faMutation.isPending && (
+                  <Loader className="animate-spin mr-2 inline" size={14} />
+                )}
+                Verify
+              </button>
+              <button
+                onClick={() => setIsVerifyModalOpen(false)}
+                className="w-full px-4 py-3 text-[#0F172A] bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                Cancel
+              </button>
             </div>
-          </DialogContent>
-        </Dialog>
-      </>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Account Card */}
       <div className="border border-gray-200 rounded-lg w-full max-w-full sm:max-w-[90%] md:max-w-[70%] ">
@@ -778,9 +592,6 @@ export default function PrivacySecurity() {
                 />
               </div>
               <p className="text-[12px] font-normal font-sfDisplay leading-[140%] text-[#94A3B8] w-[50%] mt-1 pr-10">
-                {/* Kindly confirm the successful deletion of my account and{" "}
-                <br className="hidden sm:block" /> any associated data as per
-                your privacy policy. */}
                 Kindly confirm you want to delete your account by entering your
                 current password
               </p>
@@ -802,7 +613,6 @@ export default function PrivacySecurity() {
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-[#FAFAFA] rounded-lg w-full max-w-md mx-4 relative overflow-hidden">
-            {/* Close button */}
             <button
               onClick={handleCloseModal}
               className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
@@ -811,27 +621,22 @@ export default function PrivacySecurity() {
               <X size={20} />
             </button>
 
-            {/* Modal content */}
             <div className="p-6 flex flex-col items-center">
-              {/* Warning icon */}
               <div className="w-20 h-20 rounded-full bg-[#FFFFFF] flex items-center justify-center mb-4 ">
                 <div className="w-16 h-16 rounded-full bg-[#CA3A31] flex items-center justify-center ">
                   <AlertTriangle className="text-white" size={32} />
                 </div>
               </div>
 
-              {/* Title */}
               <h3 className="text-[18px] font-bold font-creato leading-[100%] text-[#353535] mb-2 text-center">
                 Are you sure?
               </h3>
 
-              {/* Description */}
               <p className="text-[14px] font-normal font-creato leading-[150%] text-[#A2A4AC] text-center mb-6">
                 You're about to delete private training data, this step will
                 affect the workspace globally
               </p>
 
-              {/* Confirmation input */}
               <div className="w-full mb-4">
                 <p className="text-[14px] font-medium font-creato leading-[150%] text-[#727684] mb-2">
                   Type "Delete" to confirm
@@ -845,12 +650,10 @@ export default function PrivacySecurity() {
                 />
               </div>
 
-              {/* Confirm button */}
               <button
                 onClick={handleConfirmDelete}
                 disabled={
-                  deleteConfirmText.toLowerCase() !== "delete" ||
-                  isLoading
+                  deleteConfirmText.toLowerCase() !== "delete" || isLoading
                 }
                 className={`w-full py-3 rounded-md text-white text-[14px] font-medium font-creato leading-[150%] ${
                   deleteConfirmText.toLowerCase() === "delete" && !isLoading

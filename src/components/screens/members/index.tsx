@@ -13,6 +13,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -36,203 +46,229 @@ import {
   Users,
   Mail,
   Phone,
+  Loader2,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useOrganizationMembersQuery } from "@/hooks/use-member-query";
+import { useUserInfoQuery } from "@/hooks/use-auth-mutations";
+import {
+  useAddMemberMutation,
+  usedeleteMemberMutation,
+  useeditMemberMutation,
+} from "@/hooks/use-member-mutations";
 
 interface Member {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
+  userid: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    countryCode: string;
+  };
   role: string;
-  avatar?: string;
-  joinDate: string;
-  status: "active" | "inactive";
+  organizationID: string;
+  _id: string;
 }
 
-const initialMembers: Member[] = [
-  {
-    id: "1",
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@company.com",
-    phone: "+1 (555) 123-4567",
-    role: "Project Manager",
-    avatar: "/professional-man.png",
-    joinDate: "2024-01-15",
-    status: "active",
-  },
-  {
-    id: "2",
-    firstName: "Sarah",
-    lastName: "Wilson",
-    email: "sarah.wilson@company.com",
-    phone: "+1 (555) 234-5678",
-    role: "Developer",
-    avatar: "/professional-woman-diverse.png",
-    joinDate: "2024-02-20",
-    status: "active",
-  },
-  {
-    id: "3",
-    firstName: "Mike",
-    lastName: "Johnson",
-    email: "mike.johnson@company.com",
-    phone: "+1 (555) 345-6789",
-    role: "Designer",
-    avatar: "/creative-designer.png",
-    joinDate: "2024-01-10",
-    status: "active",
-  },
-  {
-    id: "4",
-    firstName: "Emily",
-    lastName: "Brown",
-    email: "emily.brown@company.com",
-    phone: "+1 (555) 456-7890",
-    role: "QA Engineer",
-    avatar: "/professional-tester.png",
-    joinDate: "2024-03-05",
-    status: "inactive",
-  },
-  {
-    id: "5",
-    firstName: "David",
-    lastName: "Lee",
-    email: "david.lee@company.com",
-    phone: "+1 (555) 567-8901",
-    role: "Team Lead",
-    avatar: "/team-leader.png",
-    joinDate: "2023-12-01",
-    status: "active",
-  },
+const roles = [
+  "projectManager",
+  "teamLead",
+  "developer",
+  "qaEngineer",
+  "uiuxDesigner",
+  "devopsEngineer",
+  "client",
+  "hrManager",
+  "supportEngineer",
+  "intern",
 ];
 
-const roles = [
-  "Project Manager",
-  "Developer",
-  "Designer",
-  "QA Engineer",
-  "Team Lead",
-  "Analyst",
-  "Scrum Master",
-];
+// Role display mapping
+const roleDisplayMap: { [key: string]: string } = {
+  projectManager: "Project Manager",
+  teamLead: "Team Lead",
+  developer: "Developer",
+  qaEngineer: "QA Engineer",
+  uiuxDesigner: "UI/UX Designer",
+  devopsEngineer: "DevOps Engineer",
+  client: "Client",
+  hrManager: "HR Manager",
+  supportEngineer: "Support Engineer",
+  intern: "Intern",
+};
 
 export default function MemberScreen() {
-  const [members, setMembers] = useState<Member[]>(initialMembers);
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
-    phone: "",
     role: "",
   });
 
+  const { data: userData } = useUserInfoQuery();
+  const { data: OrganizationData } = useOrganizationMembersQuery(
+    userData?.user.organizationId || ""
+  );
+  const addMemberMutation = useAddMemberMutation();
+  const deleteMemberMutation = usedeleteMemberMutation();
+  const editMemberMutation = useeditMemberMutation();
+
   const resetForm = () => {
     setFormData({
-      firstName: "",
-      lastName: "",
       email: "",
-      phone: "",
       role: "",
     });
   };
 
   const handleAddMember = () => {
-    if (
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.role
-    ) {
-      toast.success("Please fill in all required fields.");
+    if (!formData.email || !formData.role) {
+      toast.error("Please fill in all required fields.");
       return;
     }
-
-    const newMember: Member = {
-      id: Date.now().toString(),
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-      role: formData.role,
-      avatar: `/placeholder.svg?height=40&width=40&query=${formData.firstName}+${formData.lastName}`,
-      joinDate: new Date().toISOString().split("T")[0],
-      status: "active",
-    };
-
-    setMembers([...members, newMember]);
-    resetForm();
-    setIsAddSheetOpen(false);
-
-    toast.success("Member deleted successfully!");
+    addMemberMutation.mutate(
+      { email: formData.email, role: formData.role },
+      {
+        onSuccess: () => {
+          resetForm();
+          setIsAddSheetOpen(false);
+          toast.success("Member added successfully!");
+        },
+        onError: () => {
+          toast.error("Failed to add member. Please try again.");
+        },
+      }
+    );
   };
 
   const handleEditMember = () => {
-    if (
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.role ||
-      !editingMember
-    ) {
-      toast.success("Please fill in all required fields.");
-
+    if (!formData.role) {
+      toast.error("Please select a role.");
       return;
     }
-
-    const updatedMembers = members.map((member) =>
-      member.id === editingMember.id
-        ? {
-            ...member,
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
-            role: formData.role,
-          }
-        : member
+    editMemberMutation.mutate(
+      {
+        id: editingMember?.organizationID || "",
+        data: {
+          memberId: editingMember?.userid._id || "",
+          role: formData.role,
+        },
+      },
+      {
+        onSuccess: () => {
+          resetForm();
+          setIsEditSheetOpen(false);
+          setEditingMember(null);
+          toast.success("Member updated successfully!");
+        },
+        onError: () => {
+          toast.error("Failed to update member. Please try again.");
+        },
+      }
     );
-
-    setMembers(updatedMembers);
-    resetForm();
-    setEditingMember(null);
-    setIsEditSheetOpen(false);
-    toast.success("Member updated successfully!");
   };
 
-  const handleDeleteMember = (id: string) => {
-    setMembers(members.filter((member) => member.id !== id));
-    toast.success("Member deleted successfully!");
+  const handleDeleteClick = (member: Member) => {
+    setMemberToDelete(member);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteDialogOpen(false);
+    setMemberToDelete(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (memberToDelete) {
+      deleteMemberMutation.mutate(
+        {
+          id: memberToDelete.organizationID,
+          data: { memberId: memberToDelete.userid._id },
+        },
+        {
+          onSuccess: () => {
+            toast.success("Member deleted successfully!");
+            setIsDeleteDialogOpen(false);
+            setMemberToDelete(null);
+          },
+          onError: () => {
+            toast.error("Failed to delete member. Please try again.");
+            setIsDeleteDialogOpen(false);
+            setMemberToDelete(null);
+          },
+        }
+      );
+    }
   };
 
   const openEditSheet = (member: Member) => {
-    setEditingMember(member);
+    // Close any open dialogs first
+    setIsDeleteDialogOpen(false);
+    setMemberToDelete(null);
+
+    setIsEditSheetOpen(true);
     setFormData({
-      firstName: member.firstName,
-      lastName: member.lastName,
-      email: member.email,
-      phone: member.phone,
+      email: member.userid.email,
       role: member.role,
     });
-    setIsEditSheetOpen(true);
+    setEditingMember(member);
+  };
+
+  const handleEditSheetClose = () => {
+    setIsEditSheetOpen(false);
+    setEditingMember(null);
+    resetForm();
+  };
+
+  const handleAddSheetClose = () => {
+    setIsAddSheetOpen(false);
+    resetForm();
   };
 
   const getRoleColor = (role: string) => {
     const colors: { [key: string]: string } = {
       "Project Manager": "bg-blue-100 text-blue-800",
       Developer: "bg-green-100 text-green-800",
-      Designer: "bg-purple-100 text-purple-800",
+      "UI/UX Designer": "bg-purple-100 text-purple-800",
       "QA Engineer": "bg-orange-100 text-orange-800",
       "Team Lead": "bg-red-100 text-red-800",
-      Analyst: "bg-yellow-100 text-yellow-800",
-      "Scrum Master": "bg-indigo-100 text-indigo-800",
+      "DevOps Engineer": "bg-yellow-100 text-yellow-800",
+      Client: "bg-indigo-100 text-indigo-800",
+      "HR Manager": "bg-pink-100 text-pink-800",
+      "Support Engineer": "bg-cyan-100 text-cyan-800",
+      Intern: "bg-gray-100 text-gray-800",
     };
-    return colors[role] || "bg-gray-100 text-gray-800";
+    const displayRole = roleDisplayMap[role] || role;
+    return colors[displayRole] || "bg-gray-100 text-gray-800";
+  };
+
+  const getDisplayRole = (role: string) => {
+    return roleDisplayMap[role] || role;
+  };
+
+  const handleAddSheetOpenChange = (open: boolean) => {
+    setIsAddSheetOpen(open);
+    if (!open) {
+      resetForm();
+    }
+  };
+
+  const handleEditSheetOpenChange = (open: boolean) => {
+    setIsEditSheetOpen(open);
+    if (!open) {
+      setEditingMember(null);
+      resetForm();
+    }
+  };
+
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    setIsDeleteDialogOpen(open);
+    if (!open) {
+      setMemberToDelete(null);
+    }
   };
 
   return (
@@ -254,13 +290,14 @@ export default function MemberScreen() {
             </div>
           </div>
 
-          <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
+          <Sheet open={isAddSheetOpen} onOpenChange={handleAddSheetOpenChange}>
             <SheetTrigger asChild>
               <Button className="gap-2">
                 <Plus className="h-4 w-4" />
                 Add Member
               </Button>
             </SheetTrigger>
+
             <SheetContent className="bg-white">
               <SheetHeader>
                 <SheetTitle>Add New Member</SheetTitle>
@@ -269,30 +306,6 @@ export default function MemberScreen() {
                 </SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="firstName">First Name *</Label>
-                    <Input
-                      id="firstName"
-                      value={formData.firstName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, firstName: e.target.value })
-                      }
-                      placeholder="John"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="lastName">Last Name *</Label>
-                    <Input
-                      id="lastName"
-                      value={formData.lastName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, lastName: e.target.value })
-                      }
-                      placeholder="Doe"
-                    />
-                  </div>
-                </div>
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email *</Label>
                   <Input
@@ -303,19 +316,10 @@ export default function MemberScreen() {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     placeholder="john.doe@company.com"
+                    disabled={addMemberMutation.isLoading}
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
+
                 <div className="grid gap-2">
                   <Label htmlFor="role">Role *</Label>
                   <Select
@@ -323,6 +327,7 @@ export default function MemberScreen() {
                     onValueChange={(value) =>
                       setFormData({ ...formData, role: value })
                     }
+                    disabled={addMemberMutation.isLoading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a role" />
@@ -330,7 +335,7 @@ export default function MemberScreen() {
                     <SelectContent className="bg-white">
                       {roles.map((role) => (
                         <SelectItem key={role} value={role}>
-                          {role}
+                          {getDisplayRole(role)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -338,13 +343,25 @@ export default function MemberScreen() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleAddMember} className="flex-1">
-                  Add Member
+                <Button
+                  onClick={handleAddMember}
+                  className="flex-1"
+                  disabled={addMemberMutation.isLoading}
+                >
+                  {addMemberMutation.isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add Member"
+                  )}
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setIsAddSheetOpen(false)}
-                  className="flex-1"
+                  onClick={handleAddSheetClose}
+                  className="flex-1 bg-transparent"
+                  disabled={addMemberMutation.isLoading}
                 >
                   Cancel
                 </Button>
@@ -357,31 +374,18 @@ export default function MemberScreen() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <Card>
             <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-green-100 rounded-full">
-                  <Users className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Members</p>
-                  <p className="text-2xl font-bold">{members.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Users className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Active Members
-                  </p>
-                  <p className="text-2xl font-bold">
-                    {members.filter((m) => m.status === "active").length}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-green-100 rounded-full">
+                    <Users className="h-6 w-6 text-green-600" />
+                  </div>
+                  <p className="text-[24px] font-montreal font-medium text-muted-foreground">
+                    Total Members
                   </p>
                 </div>
+                <p className="text-[24px] font-montreal font-semibold text-muted-foreground">
+                  {OrganizationData?.totalMembers}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -389,27 +393,31 @@ export default function MemberScreen() {
 
         {/* Members Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
-          {members.map((member) => (
-            <Card key={member.id} className="hover:shadow-md transition-shadow">
+          {OrganizationData?.Members?.map((member) => (
+            <Card
+              key={member._id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
                       <AvatarImage
-                        src={member.avatar || "/placeholder.svg"}
-                        alt={`${member.firstName} ${member.lastName}`}
+                        className="capitalize"
+                        src={member.userid.profilePic || "/placeholder.svg"}
+                        alt={`${member.userid.firstName} ${member.userid.lastName}`}
                       />
-                      <AvatarFallback className="bg-primaryBlue text-white font-creato font-medium">
-                        {member.firstName[0]}
-                        {member.lastName[0]}
+                      <AvatarFallback className="bg-primaryBlue capitalize  text-white font-creato font-medium">
+                        {member.userid.firstName[0]}
+                        {member.userid.lastName[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <CardTitle className="text-lg">
-                        {member.firstName} {member.lastName}
+                        {member.userid.firstName} {member.userid.lastName}
                       </CardTitle>
                       <Badge className={`text-xs ${getRoleColor(member.role)}`}>
-                        {member.role}
+                        {getDisplayRole(member.role)}
                       </Badge>
                     </div>
                   </div>
@@ -419,13 +427,13 @@ export default function MemberScreen() {
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent className="bg-white" align="end">
                       <DropdownMenuItem onClick={() => openEditSheet(member)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDeleteMember(member.id)}
+                        onClick={() => handleDeleteClick(member)}
                         className="text-destructive"
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -439,26 +447,17 @@ export default function MemberScreen() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="h-4 w-4" />
-                    <span className="truncate">{member.email}</span>
+                    <span className="truncate">{member.userid.email}</span>
                   </div>
-                  {member.phone && (
+                  {member.userid.phoneNumber && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Phone className="h-4 w-4" />
-                      <span>{member.phone}</span>
+                      <span>
+                        {member.userid.countryCode}
+                        {member.userid.phoneNumber}
+                      </span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between pt-2">
-                    <span className="text-xs text-muted-foreground">
-                      Joined {new Date(member.joinDate).toLocaleDateString()}
-                    </span>
-                    <Badge
-                      variant={
-                        member.status === "active" ? "default" : "secondary"
-                      }
-                    >
-                      {member.status}
-                    </Badge>
-                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -466,7 +465,7 @@ export default function MemberScreen() {
         </div>
 
         {/* Edit Sheet */}
-        <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+        <Sheet open={isEditSheetOpen} onOpenChange={handleEditSheetOpenChange}>
           <SheetContent className="bg-white">
             <SheetHeader>
               <SheetTitle>Edit Member</SheetTitle>
@@ -475,53 +474,20 @@ export default function MemberScreen() {
               </SheetDescription>
             </SheetHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="editFirstName">First Name *</Label>
-                  <Input
-                    id="editFirstName"
-                    value={formData.firstName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstName: e.target.value })
-                    }
-                    placeholder="John"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="editLastName">Last Name *</Label>
-                  <Input
-                    id="editLastName"
-                    value={formData.lastName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastName: e.target.value })
-                    }
-                    placeholder="Doe"
-                  />
-                </div>
-              </div>
               <div className="grid gap-2">
                 <Label htmlFor="editEmail">Email *</Label>
                 <Input
                   id="editEmail"
                   type="email"
                   value={formData.email}
+                  disabled={true}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="john.doe@company.com"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="editPhone">Phone</Label>
-                <Input
-                  id="editPhone"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
+
               <div className="grid gap-2">
                 <Label htmlFor="editRole">Role *</Label>
                 <Select
@@ -529,6 +495,7 @@ export default function MemberScreen() {
                   onValueChange={(value) =>
                     setFormData({ ...formData, role: value })
                   }
+                  disabled={editMemberMutation.isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
@@ -536,7 +503,7 @@ export default function MemberScreen() {
                   <SelectContent className="bg-white">
                     {roles.map((role) => (
                       <SelectItem key={role} value={role}>
-                        {role}
+                        {getDisplayRole(role)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -544,19 +511,76 @@ export default function MemberScreen() {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={handleEditMember} className="flex-1">
-                Update Member
+              <Button
+                onClick={handleEditMember}
+                className="flex-1"
+                disabled={editMemberMutation.isLoading}
+              >
+                {editMemberMutation.isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Member"
+                )}
               </Button>
               <Button
                 variant="outline"
-                onClick={() => setIsEditSheetOpen(false)}
-                className="flex-1"
+                onClick={handleEditSheetClose}
+                className="flex-1 bg-transparent"
+                disabled={editMemberMutation.isLoading}
               >
                 Cancel
               </Button>
             </div>
           </SheetContent>
         </Sheet>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={handleDeleteDialogOpenChange}
+        >
+          <AlertDialogContent className="bg-white">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-red-600">
+                Delete Member
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete{" "}
+                <span className="font-medium">
+                  {memberToDelete?.userid.firstName}{" "}
+                  {memberToDelete?.userid.lastName}
+                </span>
+                ? This action cannot be undone and will permanently remove this
+                member from your organization.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={handleDeleteCancel}
+                disabled={deleteMemberMutation.isLoading}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDeleteConfirm}
+                className="bg-red-600 hover:bg-red-700 text-white"
+                disabled={deleteMemberMutation.isLoading}
+              >
+                {deleteMemberMutation.isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

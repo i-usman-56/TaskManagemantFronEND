@@ -6,11 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
-  MessageCircle,
-  Star,
-  Calendar,
-  GraduationCap,
   MoreVertical,
   Settings,
   LogOut,
@@ -25,15 +20,17 @@ import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { removeTokens } from "@/lib/auth";
 import { getNavigationItems } from "@/config/navigation";
+import { useUserInfoQuery } from "@/hooks/use-auth-mutations";
 
 export default function DashBoardSideBar({
   isMobile,
   accountType,
 }: {
   isMobile?: Boolean;
-  accountType: "individual" | "organization";
+  accountType: string;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { data: userData } = useUserInfoQuery();
   const router = useRouter();
 
   // dynamically load based on accountType
@@ -134,18 +131,22 @@ export default function DashBoardSideBar({
       <div className="border-t border-gray-200 p-4">
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/professional-headshot.png" />
+            <AvatarImage src={userData?.user.profilePic} />
             <AvatarFallback className="bg-primaryBlue text-white font-medium">
-              AN
+              {userData?.user?.firstName[0]}
+              {userData?.user?.lastName[0]}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  Adam Newman
+                  {userData?.user?.firstName}
+                  {userData?.user?.lastName}
                 </p>
-                <p className="text-xs text-gray-500 truncate">adam@gmail.com</p>
+                <p className="text-xs text-gray-500 truncate">
+                  {userData?.user?.email}
+                </p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

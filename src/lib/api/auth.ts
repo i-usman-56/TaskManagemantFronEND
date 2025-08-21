@@ -94,10 +94,54 @@ export interface resetPasswordRequest {
   token: string;
   password: string;
 }
+export interface accountInfoRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  countryCode: string;
+}
+export interface generalSettingRequest {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  image: any; // File when uploading, null if not set
+}
 
 export interface resetPasswordResponse {
   success: Boolean;
   message: string;
+}
+export interface accountInfoResponse {
+  success: Boolean;
+  message: string;
+}
+export interface generalSettingResponse {
+  success: Boolean;
+  message: string;
+}
+export interface accountTypeResponse {
+  success: Boolean;
+  accountType: string;
+}
+export interface userInfoResponse {
+  success: Boolean;
+  user: {
+    _id: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    countryCode: string;
+    profilePic: string;
+    purposeOfUse: string;
+    organizationId: string;
+    enable2fa: Boolean;
+    phone2fa: Boolean;
+    email2fa: Boolean;
+  };
 }
 export interface verifyRequest {
   tempToken: string;
@@ -115,6 +159,32 @@ export interface CheckUsernameRequest {
 }
 
 export interface CheckUsernameResponse {
+  success: boolean;
+  message: string;
+}
+export interface updatePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface updatePasswordResponse {
+  success: boolean;
+  message: string;
+}
+export interface enable2faResponse {
+  disabled: boolean;
+  success: boolean;
+  message: string;
+}
+export interface verify2faResponse {
+  success: boolean;
+  message: string;
+}
+export interface resend2faOTPResponse {
+  success: boolean;
+  message: string;
+}
+export interface deleteAccountResponse {
   success: boolean;
   message: string;
 }
@@ -208,6 +278,77 @@ export const authApi = {
     const response = await apiClient.post<resetPasswordResponse>(
       "/api/auth/reset-password",
       data
+    );
+    return response.data;
+  },
+  accountInfo: async (
+    data: accountInfoRequest
+  ): Promise<accountInfoResponse> => {
+    const response = await apiClient.post<accountInfoResponse>(
+      "/api/auth/update-settings",
+      data
+    );
+    return response.data;
+  },
+  updatePassword: async (
+    data: updatePasswordRequest
+  ): Promise<updatePasswordResponse> => {
+    const response = await apiClient.put<updatePasswordResponse>(
+      "/api/auth/update-password",
+      data
+    );
+    return response.data;
+  },
+  generalSetting: async (data: FormData): Promise<generalSettingResponse> => {
+    const response = await apiClient.post<generalSettingResponse>(
+      "/api/auth/update-settings",
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+  accountType: async (): Promise<accountTypeResponse> => {
+    const response = await apiClient.get<accountTypeResponse>(
+      "/api/auth/accountype"
+    );
+    return response.data;
+  },
+  userInfo: async (): Promise<userInfoResponse> => {
+    const response = await apiClient.get<userInfoResponse>(
+      "/api/auth/user-info"
+    );
+    return response.data;
+  },
+  enable2fa: async (data: {
+    channel: string;
+    disabled?: Boolean;
+  }): Promise<enable2faResponse> => {
+    const response = await apiClient.post<enable2faResponse>(
+      "/api/auth/enable-2fa",
+      data
+    );
+    return response.data;
+  },
+  verify2fa: async (data: { otp: string }): Promise<verify2faResponse> => {
+    const response = await apiClient.post<verify2faResponse>(
+      "/api/auth/verify-2fa",
+      data
+    );
+    return response.data;
+  },
+  resend2fa: async (): Promise<resend2faOTPResponse> => {
+    const response = await apiClient.get<resend2faOTPResponse>(
+      "/api/auth/resend-2fa"
+    );
+    return response.data;
+  },
+  deleteAccount: async (): Promise<deleteAccountResponse> => {
+    const response = await apiClient.delete<deleteAccountResponse>(
+      "/api/auth/delete-account"
     );
     return response.data;
   },

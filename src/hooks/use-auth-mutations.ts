@@ -1,15 +1,18 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  accountInfoRequest,
   authApi,
   CheckUsernameRequest,
   forgotPasswordRequest,
+  generalSettingRequest,
   LoginRequest,
   RegisterRequest,
   resend2faRequest,
   resendRequest,
   resetPasswordRequest,
+  updatePasswordRequest,
   verification2faRequest,
   verificationRequest,
   verifyRequest,
@@ -225,12 +228,188 @@ export function use2faVerifyOTPMutation() {
     },
   });
 }
+export function useaccountInfoMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: accountInfoRequest) => authApi.accountInfo(data),
+    onSuccess: (data) => {
+      console.log(data);
+
+      toast.success(data.message || "Account Info Setting Updated SuccesFully");
+      queryClient.invalidateQueries({ queryKey: ["user-info"] });
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function usegeneralSettingMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: FormData) => authApi.generalSetting(data),
+    onSuccess: (data) => {
+      console.log(data);
+
+      toast.success(data.message || "Account Info Setting Updated SuccesFully");
+      queryClient.invalidateQueries({ queryKey: ["user-info"] });
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function useUpdatePasswordMutation() {
+  return useMutation({
+    mutationFn: (data: updatePasswordRequest) => authApi.updatePassword(data),
+    onSuccess: (data) => {
+      toast.success(data.message || "Password Updated SuccesFully");
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function useenable2faMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { channel: string; disabled: Boolean }) =>
+      authApi.enable2fa(data),
+    onSuccess: (data) => {
+      toast.success(data.message || "Password Updated SuccesFully");
+      if (data.disabled) {
+        queryClient.invalidateQueries({ queryKey: ["user-info"] });
+      }
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function useverify2faMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { otp: string }) => authApi.verify2fa(data),
+    onSuccess: (data) => {
+      toast.success(data.message || "Password Updated SuccesFully");
+      queryClient.invalidateQueries({ queryKey: ["user-info"] });
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function useresend2faMutation() {
+  return useMutation({
+    mutationFn: () => authApi.resend2fa(),
+    onSuccess: (data) => {
+      toast.success(data.message || "Password Updated SuccesFully");
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function usedeleteAccountMutation() {
+  return useMutation({
+    mutationFn: () => authApi.deleteAccount(),
+    onSuccess: (data) => {
+      toast.success(data.message || "Password Updated SuccesFully");
+    },
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function useAccountTypeQuery() {
+  return useQuery({
+    queryKey: ["accountType"], // ✅ cache key for this query
+    queryFn: () => authApi.accountType(), // ✅ use queryFn
+    onSuccess: (data) => {},
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
+export function useUserInfoQuery() {
+  return useQuery({
+    queryKey: ["user-info"], // ✅ cache key for this query
+    queryFn: () => authApi.userInfo(), // ✅ use queryFn
+    onSuccess: (data) => {},
+    onError: (error: any) => {
+      console.log(error);
+      const errorMessage =
+        error?.response?.data?.message ||
+        "Registration failed. Please try again.";
+
+      toast.error(errorMessage || "Verification Failed");
+
+      console.error("Registration error:", error);
+    },
+  });
+}
 export function useforgotPasswordMutation() {
   const router = useRouter();
   return useMutation({
     mutationFn: (data: forgotPasswordRequest) => authApi.forgotPassword(data),
     onSuccess: (data) => {
-      console.log(data);
       // Store tokens
 
       toast.success(data.message || "Email Link Send SuccessFully");
@@ -270,7 +449,6 @@ export function useresetPasswordMutation() {
     },
   });
 }
-
 export function useCheckUsernameMutation() {
   return useMutation({
     mutationFn: (data: CheckUsernameRequest) => authApi.checkUsername(data),

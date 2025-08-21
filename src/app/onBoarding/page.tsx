@@ -350,7 +350,7 @@ export default function OnboardingPage() {
             <p className="text-gray-600">Tell us about your organization</p>
           </div>
 
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label htmlFor="logoUpload">Organization Logo</Label>
             <div className="flex items-center space-x-4">
               {logoPreview ? (
@@ -394,7 +394,7 @@ export default function OnboardingPage() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="orgName">Organization Name</Label>

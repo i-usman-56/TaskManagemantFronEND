@@ -16,13 +16,13 @@ const navItem: NavItem[] = [
     name: "Account Info",
     path: "/dashboard/account/account-info",
     description:
-      "We do not sell or share your details without your permission.<br/> Find out more in our Privacy Policy. Your username, email, and password can be updated via your Account Settings.",
+      "We do not sell or share your details without your permission. Find out more in our Privacy Policy. Your username, email, and password can be updated via your Account Settings.",
   },
   {
     name: "Settings",
     path: "/dashboard/account/general-settings",
     description:
-      "We do not sell or share your details without your permission.<br/> Find out more in our Privacy Policy. Your username, email, and password can be updated via your Account Settings.",
+      "We do not sell or share your details without your permission. Find out more in our Privacy Policy. Your username, email, and password can be updated via your Account Settings.",
   },
   {
     name: "Privacy & Security",

@@ -96,7 +96,7 @@ const PhoneInput = ({
   }, [isDropdownOpen])
 
   useEffect(() => {
-    if (disabled && value) {
+    if (value) {
       setPhoneNumber(value)
     }
   }, [value, disabled])

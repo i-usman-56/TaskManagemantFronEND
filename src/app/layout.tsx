@@ -17,7 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="unselectable antialiased">
+      <body
+        className="unselectable antialiased"
+        suppressHydrationWarning={true}
+      >
         <ReactQueryProvider>
           <TanstackProvider>
             <AuthProvider>

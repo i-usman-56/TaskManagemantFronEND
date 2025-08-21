@@ -5,6 +5,9 @@ import DashBoardSideBar from "@/components/common/dashboard-sidebar";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import type React from "react";
+import {
+  useAccountTypeQuery,
+} from "@/hooks/use-auth-mutations";
 
 export default function DashBoardLayout({
   children,
@@ -12,6 +15,7 @@ export default function DashBoardLayout({
   children: React.ReactNode;
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { data } = useAccountTypeQuery();
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -39,8 +43,8 @@ export default function DashBoardLayout({
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
-        <DashBoardSideBar accountType="organization" />
-        {/* <DashBoardSideBar accountType="individual" /> */}
+        {/* <DashBoardSideBar accountType="organization" /> */}
+        <DashBoardSideBar accountType={data?.accountType || ""} />
       </div>
 
       {/* Mobile Sidebar */}
@@ -50,7 +54,10 @@ export default function DashBoardLayout({
         }`}
       >
         <div className="w-72 h-screen">
-          <DashBoardSideBar isMobile={true} accountType="individual" />
+          <DashBoardSideBar
+            isMobile={true}
+            accountType={data?.accountType || ""}
+          />
         </div>
       </div>
 

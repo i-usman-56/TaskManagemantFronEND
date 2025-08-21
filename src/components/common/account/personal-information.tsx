@@ -1,51 +1,70 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CiMail } from "react-icons/ci";
-import { HiOutlinePhone } from "react-icons/hi";
+import PhoneInput from "../phone-input";
+import { isValidPhoneNumber, parsePhoneNumber } from "libphonenumber-js";
+import { Loader } from "lucide-react";
+import { useaccountInfoMutation } from "@/hooks/use-auth-mutations";
 
 const PersonalInformation = ({
-  defaultFullName,
-  defaulPhoneNumber,
+  defaultFirstName,
+  defaultLastName,
+  defaultPhoneNumber, // Fixed typo
+  defaultCountryCode, // Fixed typo
   defaultEmail,
-  defaultStreetNumber,
-  defaultHouseNumber,
-  defaultCity,
-  defaultState,
 }: any) => {
-  const [fullName, setFullName] = useState(defaultFullName);
+  const [firstName, setFirstName] = useState(defaultFirstName);
+  const [lastName, setLastName] = useState(defaultLastName);
   const [email, setEmail] = useState(defaultEmail);
-  const [phoneNumber, setPhoneNumber] = useState(defaulPhoneNumber);
-  const [streetNumber, setStreetNumber] = useState(defaultStreetNumber);
-  const [houseNumber, setHouseNumber] = useState(defaultHouseNumber);
-  const [city, setCity] = useState(defaultCity);
-  const [state, setState] = useState(defaultState);
-  console.log(streetNumber);
-  console.log(houseNumber);
-  // Simulating the hook for demo purposes
-  // const isPending = false;
+  const [phoneNumber, setPhoneNumber] = useState(defaultPhoneNumber);
+  const [countryCode, setCountryCode] = useState(defaultCountryCode);
+  const [phoneValid, setPhoneValid] = useState(false);
+  const accountInfoMutate = useaccountInfoMutation();
 
   const handleSubmit = async () => {
-    console.log({
-      fullName,
+    accountInfoMutate.mutate({
+      firstName,
+      lastName,
       email,
+      countryCode,
       phoneNumber,
-      // address: {
-      StreetNumber: streetNumber,
-      houseNumber: houseNumber,
-      city,
-      state,
-      // },
     });
   };
 
   const handleDiscard = () => {
-    setFullName(defaultFullName);
-    setPhoneNumber(defaulPhoneNumber);
+    setFirstName(defaultFirstName);
+    setLastName(defaultLastName);
+    setCountryCode(defaultCountryCode); // Fixed typo
+    setPhoneNumber(defaultPhoneNumber); // Fixed typo
     setEmail(defaultEmail);
-    setStreetNumber(defaultStreetNumber);
-    setHouseNumber(defaultHouseNumber);
-    setCity(defaultCity);
-    setState(defaultState);
+  };
+
+  useEffect(() => {
+    if (phoneNumber && countryCode) {
+      const isValid = isValidPhoneNumber(`${countryCode}${phoneNumber}`);
+      setPhoneValid(isValid);
+    }
+  }, [phoneNumber, countryCode]); // Added dependencies
+
+  const handlePhoneChange = (
+    phone: string,
+    countryCode: string,
+    isValid: boolean
+  ) => {
+    setPhoneValid(isValid);
+    setCountryCode(countryCode);
+    setPhoneNumber(phone); // Fixed: was setting phoneNumber instead of phone
+    console.log("Phone changed:", { phone, countryCode, isValid });
+  };
+
+  const getCountryCode = (phone: string) => {
+    try {
+      const phoneNumber = parsePhoneNumber(phone);
+      return phoneNumber?.country || null; // Example: 'PK', 'US'
+    } catch (error) {
+      console.error("Invalid phone number:", error);
+      return null;
+    }
   };
 
   return (
@@ -62,189 +81,82 @@ const PersonalInformation = ({
           {/* Full Name */}
           <div className="space-y-1.5">
             <label
-              htmlFor="fullName"
+              htmlFor="firstName"
               className="block text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A]"
             >
-              Full Name
+              First Name
             </label>
             <input
-              id="fullName"
+              id="firstName"
               type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="John Smith"
+              value={firstName || ""} // Added fallback
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="John"
               className="w-full  px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-0"
             />
           </div>
-
-          {/* Email */}
           <div className="space-y-1.5">
             <label
-              htmlFor="email"
+              htmlFor="lastName"
               className="block text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A]"
             >
-              Email
+              Last Name
             </label>
-            <div className="relative">
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tahsiankhan380@gmail.com"
-                // disabled={true}
-                className="w-full  pl-10 pr-4 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-0"
-              />
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <CiMail className="text-gray-400" size={20} />
-              </div>
-            </div>
+            <input
+              id="lastName"
+              type="text"
+              value={lastName || ""} // Added fallback
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Smith"
+              className="w-full  px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-0"
+            />
           </div>
         </div>
 
-        {/* Phone Number */}
+        {/* Email */}
         <div className="space-y-1.5">
           <label
-            htmlFor="phone"
+            htmlFor="email"
             className="block text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A]"
           >
-            Phone Number
+            Email
           </label>
           <div className="relative">
             <input
-              id="phone"
-              type="text"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="+1 (000) 000-0000"
-              className="w-full sm:w-[70%] md:w-[60%] lg:w-[49%] pl-10 pr-4 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-0"
+              id="email"
+              type="email"
+              value={email || ""} // Added fallback
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tahsiankhan380@gmail.com"
+              // disabled={true}
+              className="w-full  pl-10 pr-4 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-0"
             />
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <HiOutlinePhone className="text-gray-400" size={20} />
+              <CiMail className="text-gray-400" size={20} />
             </div>
           </div>
         </div>
+        {/* Phone Number */}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {/* Street Number */}
-          {/* <div className="space-y-1.5">
-            <label
-              htmlFor="street"
-              className="block text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A]"
-            >
-              Street Number
-            </label>
-            <input
-              id="street"
-              type="text"
-              value={streetNumber}
-              onChange={(e) => setStreetNumber(e.target.value)}
-              placeholder="Street # 56"
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-0"
-            />
-          </div> */}
-
-          {/* House Number */}
-          {/* <div className="space-y-1.5">
-            <label
-              htmlFor="house"
-              className="block text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A]"
-            >
-              Apt / House Number
-            </label>
-            <input
-              id="house"
-              type="text"
-              value={houseNumber}
-              onChange={(e) => setHouseNumber(e.target.value)}
-              placeholder="House no. 426"
-              className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-0"
-            />
-          </div> */}
-
-          {/* City */}
-          {/* <div className="space-y-1.5">
-            <label
-              htmlFor="city"
-              className="block text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A]"
-            >
-              City
-            </label>
-            <div className="relative">
-              <select
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-white appearance-none focus:outline-none focus:ring-0 text-gray-500"
-              >
-                <option value="">Select City</option>
-                <option value="Lahore">Lahore</option>
-                <option value="Karachi">Karachi</option>
-                <option value="Islamabad">Islamabad</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </div> */}
-
-          {/* State */}
-          {/* <div className="space-y-1.5">
-            <label
-              htmlFor="state"
-              className="block text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A]"
-            >
-              State
-            </label>
-            <div className="relative">
-              <select
-                id="state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-xl bg-white appearance-none focus:outline-none focus:ring-0 text-gray-500"
-              >
-                <option value="">Select State</option>
-                <option value="Punjab">Punjab</option>
-                <option value="Sindh">Sindh</option>
-                <option value="KPK">KPK</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  ></path>
-                </svg>
-              </div>
-            </div>
-          </div> */}
+        <div className="space-y-1.5">
+          {/* Phone Number */}
+          <PhoneInput
+            value={phoneNumber || ""} // Added fallback
+            countrycode={getCountryCode(`${countryCode}${phoneNumber}`) || ""}
+            onChange={handlePhoneChange}
+            error={
+              phoneNumber && !phoneValid
+                ? "Please enter a valid phone number"
+                : ""
+            } // Only show error if phone number exists
+            placeholder="999-99996745"
+          />
         </div>
 
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row sm:justify-end gap-3 pt-2">
           <button
-            // disabled={isPending}
+            disabled={accountInfoMutate.isLoading}
             onClick={handleDiscard}
             className="px-4 py-3 text-[14px] font-sfDisplay leading-[140%] font-medium text-[#0F172A] border border-gray-300 rounded-xl hover:bg-gray-50 w-full sm:w-auto"
           >
@@ -252,12 +164,12 @@ const PersonalInformation = ({
           </button>
           <button
             onClick={handleSubmit}
-            // disabled={isPending}
+            disabled={accountInfoMutate.isLoading}
             className="px-4 py-3 text-[14px] font-sfDisplay leading-[140%] font-medium text-[#FFFFFF] bg-[#005294] rounded-xl w-full sm:w-auto"
           >
-            {/* {isPending && (
+            {accountInfoMutate.isLoading && (
               <Loader className="animate-spin mr-2 inline" size={14} />
-            )} */}
+            )}
             Save
           </button>
         </div>

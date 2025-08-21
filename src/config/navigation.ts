@@ -8,9 +8,7 @@ import {
   UserCheck,
 } from "lucide-react";
 
-export const getNavigationItems = (
-  accountType: "individual" | "organization"
-) => {
+export const getNavigationItems = (accountType: string) => {
   const common = [
     {
       name: "Dashboard",
@@ -30,12 +28,12 @@ export const getNavigationItems = (
       active: false,
       route: "/dashboard/calender",
     },
-    {
-      name: "Reports",
-      icon: BarChart3,
-      active: false,
-      route: "/dashboard/reports",
-    },
+    // {
+    //   name: "Reports",
+    //   icon: BarChart3,
+    //   active: false,
+    //   route: "/dashboard/reports",
+    // },
     // { name: "Notifications", icon: Bell, active: false ,route:""},
   ];
 
@@ -48,12 +46,12 @@ export const getNavigationItems = (
         active: false,
         route: "/dashboard/all-task",
       },
-      {
-        name: "Assign Tasks",
-        icon: UserCheck,
-        active: false,
-        route: "/dashboard/assign-task",
-      },
+      // {
+      //   name: "Assign Tasks",
+      //   icon: UserCheck,
+      //   active: false,
+      //   route: "/dashboard/assign-task",
+      // },
       {
         name: "Members",
         icon: Users,
