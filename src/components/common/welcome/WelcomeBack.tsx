@@ -31,7 +31,7 @@ const WelcomeBack = () => {
       <div>
 
       <h1 className="lg:text-[35px] text-[25px] font-medium leading-[140%] text-center text-white">
-        Wellcome Back!
+        Welcome Back!
       </h1>
       <p className="text-center text-[#B8DFFF] mb-8  text-[12px] lg:text-[14px]  font-normal space-y-[14px] leading-[140%] ">
         Discover what’s new
