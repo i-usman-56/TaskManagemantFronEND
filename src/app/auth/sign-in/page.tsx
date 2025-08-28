@@ -175,6 +175,17 @@ export default function LoginPage() {
             or
           </p>
         </div>
+        <div className="text-center flex items-center justify-center lg:hidden">
+          <p className="text-[14px] font-medium font-sfDisplay leading-[140%] text-[#64748B] md:text-end mb-4">
+            Don't have account{" "}
+            <Link
+              href={`/auth/sign-up`}
+              className="hover:underline font-medium leading-[140%] font-sfDisplay text-[#64748B] text-[14px]"
+            >
+              Sign Up
+            </Link>
+          </p>
+        </div>
         <div className=" w-full ">
           <Button
             variant="outline"

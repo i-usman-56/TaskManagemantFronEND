@@ -18,6 +18,7 @@ import {
 } from "@/hooks/use-auth-mutations";
 import PhoneInput from "@/components/common/phone-input";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 // Extended schema with phone validation
 const registerSchema = z
@@ -563,6 +564,17 @@ const SignUpFormWithPhone = () => {
         <div className="flex items-center w-full justify-center gap-3 mb-5">
           <p className="text-[14px] font-normal leading-[140%] font-sfDisplay space-y-[14px] text-[#64748B]">
             or
+          </p>
+        </div>
+        <div className="text-center flex items-center justify-center lg:hidden" >
+          <p className="text-[14px] font-medium font-sfDisplay leading-[140%] text-[#64748B] md:text-end mb-4">
+            Already have account{" "}
+            <Link
+              href={`/auth/sign-in`}
+              className="hover:underline font-medium leading-[140%] font-sfDisplay text-[#64748B] text-[14px]"
+            >
+              Sign in
+            </Link>
           </p>
         </div>
         <div className="flex gap-2">
