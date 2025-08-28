@@ -241,7 +241,7 @@ const SignUpFormWithPhone = () => {
   };
 
   return (
-    <div className="flex flex-col items-center md:w-[25rem] w-[21rem]">
+    <div className="flex flex-col items-center md:w-[25rem] w-[21rem] pt-10 pb-16 lg:pt-0 lg:pb-0">
       <form
         onSubmit={handleSubmit(handleRegister)}
         method="post"
