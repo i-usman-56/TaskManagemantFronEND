@@ -133,16 +133,22 @@ export default function DashBoardSideBar({
           <Avatar className="h-10 w-10">
             <AvatarImage src={userData?.user.profilePic} />
             <AvatarFallback className="bg-primaryBlue text-white font-medium">
-              {userData?.user?.firstName?.at(0)||""}
-              {userData?.user?.lastName?.at(0)||""}
+              {userData?.user?.firstName?.at(0) || ""}
+              {userData?.user?.lastName?.at(0) || ""}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {userData?.user?.firstName}{" "}
-                  {userData?.user?.lastName}
+                  {userData?.user.firstName && userData.user.lastName ? (
+                    <>
+                      {userData.user.firstName.charAt(0)}
+                      {userData.user.lastName.charAt(0)}
+                    </>
+                  ) : (
+                    userData?.user.username || ""
+                  )}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {userData?.user?.email}

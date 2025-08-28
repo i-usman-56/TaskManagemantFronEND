@@ -238,7 +238,7 @@ export default function AllTaskScreen() {
     refetch,
   } = useAllTaskORGQuery(queryParams);
 
-    const priorityColors = {
+  const priorityColors = {
     low: "bg-gray-100 text-gray-800",
     medium: "bg-orange-100 text-orange-800",
     high: "bg-red-100 text-red-800",
@@ -286,7 +286,7 @@ export default function AllTaskScreen() {
       },
     });
   };
-    const handleViewTask = (task: Task) => {
+  const handleViewTask = (task: Task) => {
     setViewTask(task);
     setIsViewSheetOpen(true);
   };
@@ -531,7 +531,14 @@ export default function AllTaskScreen() {
                           key={member.userid._id}
                           value={member.userid._id}
                         >
-                          {member.userid.firstName} {member.userid.lastName} –{" "}
+                          {member.userid.firstName && member.userid.lastName ? (
+                            <>
+                              {member.userid.firstName.charAt(0)}
+                              {member.userid.lastName.charAt(0)}
+                            </>
+                          ) : (
+                            member.userid.username || ""
+                          )}
                           <span className="text-xs text-gray-500">
                             {member.role}
                           </span>
@@ -746,7 +753,7 @@ export default function AllTaskScreen() {
                           </Badge>
                         </div>
                       </div>
-                       <Button
+                      <Button
                         variant="ghost"
                         onClick={() => handleViewTask(task)}
                         size="icon"
@@ -1117,46 +1124,46 @@ export default function AllTaskScreen() {
           </div>
         </SheetContent>
       </Sheet>
-       <Sheet
-              open={isViewSheetOpen}
-              onOpenChange={(open) => setIsViewSheetOpen(open)} // <-- FIX
-            >
-              <SheetContent className="bg-white">
-                <>
-                  <SheetHeader>
-                    <SheetTitle>{viewTask?.name}</SheetTitle>
-                    <SheetDescription>{viewTask?.description}</SheetDescription>
-                  </SheetHeader>
-      
-                  <div className="mt-6 space-y-4">
-                    <div className="flex gap-2">
-                      <Badge className={priorityColors[viewTask?.priority]}>
-                        {viewTask?.priority}
-                      </Badge>
-                    </div>
-                    <div className="space-y-2">
-                      <p>
-                        <strong>Assignee:</strong> {viewTask?.assignto.firstName}
-                        {viewTask?.assignto.lastName}
-                      </p>
-                      <p>
-                        <strong>Due Date:</strong> {formatDate(viewTask?.duedate)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-2">Tags:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {viewTask?.tags.map((tag) => (
-                          <Badge key={tag} variant="outline">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              </SheetContent>
-            </Sheet>
+      <Sheet
+        open={isViewSheetOpen}
+        onOpenChange={(open) => setIsViewSheetOpen(open)} // <-- FIX
+      >
+        <SheetContent className="bg-white">
+          <>
+            <SheetHeader>
+              <SheetTitle>{viewTask?.name}</SheetTitle>
+              <SheetDescription>{viewTask?.description}</SheetDescription>
+            </SheetHeader>
+
+            <div className="mt-6 space-y-4">
+              <div className="flex gap-2">
+                <Badge className={priorityColors[viewTask?.priority]}>
+                  {viewTask?.priority}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <p>
+                  <strong>Assignee:</strong> {viewTask?.assignto.firstName}
+                  {viewTask?.assignto.lastName}
+                </p>
+                <p>
+                  <strong>Due Date:</strong> {formatDate(viewTask?.duedate)}
+                </p>
+              </div>
+              <div>
+                <p className="font-semibold mb-2">Tags:</p>
+                <div className="flex flex-wrap gap-2">
+                  {viewTask?.tags.map((tag) => (
+                    <Badge key={tag} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
