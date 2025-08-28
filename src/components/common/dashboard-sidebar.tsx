@@ -143,8 +143,8 @@ export default function DashBoardSideBar({
                 <p className="text-sm font-medium text-gray-900 truncate">
                   {userData?.user.firstName && userData.user.lastName ? (
                     <>
-                      {userData.user.firstName.charAt(0)}
-                      {userData.user.lastName.charAt(0)}
+                      {userData.user.firstName}
+                      {userData.user.lastName}
                     </>
                   ) : (
                     userData?.user.username || ""

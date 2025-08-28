@@ -374,9 +374,20 @@ export default function MyTaskScreen() {
     return new Date(dueDate) < new Date();
   };
 
-  const getUserInitials = (firstName: string, lastName: string) => {
+const getUserInitials = (
+  firstName?: string,
+  lastName?: string,
+  username?: string
+) => {
+  if (firstName && lastName) {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
+  }
+  if (username) {
+    return username.substring(0, 2).toUpperCase();
+  }
+  return ""; // fallback if nothing exists
+};
+
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -851,12 +862,21 @@ export default function MyTaskScreen() {
                           <AvatarFallback className="text-xs bg-primaryBlue text-white">
                             {getUserInitials(
                               task.createdBy.firstName,
-                              task.createdBy.lastName
+                              task.createdBy.lastName,
+                               task.assignto?.username
                             )}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm text-gray-600">
-                          {task.createdBy.firstName} {task.createdBy.lastName}
+                           {task.createdBy.firstName && task.createdBy.lastName ? (
+                          <>
+                            {task.createdBy.firstName}
+                            {task.createdBy.lastName}
+                          </>
+                        ) : (
+                          task.createdBy.username||
+                          ""
+                        )}
                         </span>
                       </div>
                       <span className="text-xs text-gray-500">
