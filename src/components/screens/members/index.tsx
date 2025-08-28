@@ -404,17 +404,35 @@ export default function MemberScreen() {
                     <Avatar className="h-12 w-12">
                       <AvatarImage
                         className="capitalize"
-                        src={member.userid.profilePic || "/placeholder.svg"}
-                        alt={`${member.userid.firstName} ${member.userid.lastName}`}
+                        src={member?.userid?.profilePic || "/placeholder.svg"}
+                        alt={`${member?.userid?.firstName || ""} ${
+                          member?.userid?.lastName || ""
+                        }`}
                       />
-                      <AvatarFallback className="bg-primaryBlue capitalize  text-white font-creato font-medium">
-                        {member.userid.firstName[0]}
-                        {member.userid.lastName[0]}
+                      <AvatarFallback className="bg-primaryBlue capitalize text-white font-creato font-medium">
+                        {member.userid.firstName && member.userid.lastName ? (
+                          <>
+                            {member.userid.firstName.charAt(0)}
+                            {member.userid.lastName.charAt(0)}
+                          </>
+                        ) : (
+                          member.userid.username?.slice(0, 2).toUpperCase() ||
+                          ""
+                        )}
                       </AvatarFallback>
                     </Avatar>
+
                     <div>
                       <CardTitle className="text-lg">
-                        {member.userid.firstName} {member.userid.lastName}
+                        {member.userid.firstName && member.userid.lastName ? (
+                          <>
+                            {member.userid.firstName.charAt(0)}
+                            {member.userid.lastName.charAt(0)}
+                          </>
+                        ) : (
+                          member.userid.username||
+                          ""
+                        )}
                       </CardTitle>
                       <Badge className={`text-xs ${getRoleColor(member.role)}`}>
                         {getDisplayRole(member.role)}
