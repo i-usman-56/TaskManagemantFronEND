@@ -197,7 +197,7 @@ const VerifyOTPForm: React.FC<VerifyOTPFormProps> = ({
       <div className="flex flex-col pb-1 items-center justify-center text-nowrap gap-2 md:gap-3 pt-[32px]">
         <div>
           <p className="text-[14px] leading-[140%] space-y-[14px] font-sfDisplay font-normal text-[#64748B] text-center md:text-left">
-            © 2024 Hey Dividend, LLC. All rights reserved.
+            © 2025 TMS, LLC. All rights reserved.
           </p>
         </div>
       </div>
