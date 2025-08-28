@@ -143,7 +143,8 @@ class ApiClient {
     this.clearTokens()
 
     if (typeof window !== "undefined") {
-      window.location.href = "http://localhost:3000/auth/sign-in"
+      window.location.href = 
+      "https://task-managemant-fron-end.vercel.app/auth/sign-in"
     }
   }
 
