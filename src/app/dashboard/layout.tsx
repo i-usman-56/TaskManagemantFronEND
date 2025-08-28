@@ -7,6 +7,7 @@ import { Menu } from "lucide-react";
 import type React from "react";
 import {
   useAccountTypeQuery,
+  useUserInfoQuery,
 } from "@/hooks/use-auth-mutations";
 
 export default function DashBoardLayout({
@@ -16,6 +17,7 @@ export default function DashBoardLayout({
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { data } = useAccountTypeQuery();
+  const { data:userData } = useUserInfoQuery();
 
   return (
     <div className="h-screen flex overflow-hidden">
@@ -67,7 +69,7 @@ export default function DashBoardLayout({
         <div className="h-[7.5%] flex items-center justify-between px-6 w-full border border-gray-200">
           <div className="flex items-center gap-2 mr-3 mt-2">
             <h1 className=" text-[16px] font-medium font-sfDisplay ">
-              Hi, Muhammad Usman
+              Hi, {userData?.user.firstName}{" "}{userData?.user.lastName}
             </h1>
             <span className=" text-[16px] font-medium font-sfDisplay ">
               Welcome Back

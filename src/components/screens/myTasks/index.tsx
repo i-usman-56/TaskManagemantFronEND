@@ -56,6 +56,7 @@ import {
   Calendar,
   Star,
   Tag,
+  View,
 } from "lucide-react";
 import {
   useaddTaskMutation,
@@ -186,7 +187,9 @@ export default function MyTaskScreen() {
   // Sheet states
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isViewSheetOpen, setIsViewSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [viewTask, setViewTask] = useState<Task | null>(null);
 
   // New task form state
   const [newTask, setNewTask] = useState({
@@ -204,7 +207,6 @@ export default function MyTaskScreen() {
   // Account and organization data
   const { data: accountData } = useAccountTypeQuery();
   const { data: userData } = useUserInfoQuery();
-
 
   // Debounce search term
   useEffect(() => {
@@ -274,6 +276,12 @@ export default function MyTaskScreen() {
       },
     });
   };
+  const priorityColors = {
+    low: "bg-gray-100 text-gray-800",
+    medium: "bg-orange-100 text-orange-800",
+    high: "bg-red-100 text-red-800",
+    urgent: "bg-purple-100 text-purple-800",
+  };
 
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
@@ -294,6 +302,10 @@ export default function MyTaskScreen() {
       createdBy: task.createdBy._id,
     });
     setIsEditSheetOpen(true);
+  };
+  const handleViewTask = (task: Task) => {
+    setViewTask(task);
+    setIsViewSheetOpen(true);
   };
 
   const handleUpdateTask = async () => {
@@ -398,7 +410,7 @@ export default function MyTaskScreen() {
             </p>
           </div>
           <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-            <SheetTrigger asChild >
+            <SheetTrigger asChild>
               <Button className="flex items-center gap-2">
                 <Plus className="h-4 w-4" />
                 Add Task
@@ -704,47 +716,58 @@ export default function MyTaskScreen() {
                           </Badge>
                         </div>
                       </div>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleEditTask(task)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="bg-white">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Task</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete "{task.name}"?
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() =>
-                                  handleDeleteTask(task._id, task.name)
-                                }
-                                className="bg-red-600 hover:bg-red-700 text-white"
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleViewTask(task)}
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700"
+                      >
+                        <View className="h-4 w-4" />
+                      </Button>
+
+                      {task.createdBy._id === task.assignto._id && (
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleEditTask(task)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-red-600 hover:text-red-700"
                               >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="bg-white">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Task</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{task.name}"?
+                                  This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDeleteTask(task._id, task.name)
+                                  }
+                                  className="bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -779,13 +802,16 @@ export default function MyTaskScreen() {
                         <Calendar className="h-4 w-4 text-gray-500" />
                         <span
                           className={`text-sm ${
-                            isOverdue(task.duedate)
+                            isOverdue(task.duedate) &&
+                            task.status !== "Completed"
                               ? "text-red-600 font-medium"
                               : "text-gray-600"
                           }`}
                         >
                           Due: {formatDate(task.duedate)}
-                          {isOverdue(task.duedate) && " (Overdue)"}
+                          {isOverdue(task.duedate) &&
+                            task.status !== "Completed" &&
+                            " (Overdue)"}
                         </span>
                       </div>
                     )}
@@ -819,18 +845,18 @@ export default function MyTaskScreen() {
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
                           <AvatarImage
-                            src={task.assignto.profilePic || ""}
-                            alt={`${task.assignto.firstName} ${task.assignto.lastName}`}
+                            src={task.createdBy.profilePic || ""}
+                            alt={`${task.createdBy.firstName} ${task.createdBy.lastName}`}
                           />
-                          <AvatarFallback className="text-xs">
+                          <AvatarFallback className="text-xs bg-primaryBlue text-white">
                             {getUserInitials(
-                              task.assignto.firstName,
-                              task.assignto.lastName
+                              task.createdBy.firstName,
+                              task.createdBy.lastName
                             )}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm text-gray-600">
-                          {task.assignto.firstName} {task.assignto.lastName}
+                          {task.createdBy.firstName} {task.createdBy.lastName}
                         </span>
                       </div>
                       <span className="text-xs text-gray-500">
@@ -1032,6 +1058,46 @@ export default function MyTaskScreen() {
               Update Task
             </Button>
           </div>
+        </SheetContent>
+      </Sheet>
+      <Sheet
+        open={isViewSheetOpen}
+        onOpenChange={(open) => setIsViewSheetOpen(open)} // <-- FIX
+      >
+        <SheetContent className="bg-white">
+          <>
+            <SheetHeader>
+              <SheetTitle>{viewTask?.name}</SheetTitle>
+              <SheetDescription>{viewTask?.description}</SheetDescription>
+            </SheetHeader>
+
+            <div className="mt-6 space-y-4">
+              <div className="flex gap-2">
+                <Badge className={priorityColors[viewTask?.priority]}>
+                  {viewTask?.priority}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <p>
+                  <strong>Assignee:</strong> {viewTask?.assignto.firstName}
+                  {viewTask?.assignto.lastName}
+                </p>
+                <p>
+                  <strong>Due Date:</strong> {formatDate(viewTask?.duedate)}
+                </p>
+              </div>
+              <div>
+                <p className="font-semibold mb-2">Tags:</p>
+                <div className="flex flex-wrap gap-2">
+                  {viewTask?.tags.map((tag) => (
+                    <Badge key={tag} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
         </SheetContent>
       </Sheet>
     </div>

@@ -56,6 +56,7 @@ import {
   Calendar,
   Star,
   Tag,
+  View,
 } from "lucide-react";
 import {
   useaddTaskMutation,
@@ -182,12 +183,14 @@ export default function AllTaskScreen() {
   const addTaskMutation = useaddTaskMutation();
   const updateTaskMutation = useUpdateTaskMutation();
   const editTaskMutation = useeditTaskMutation();
+  const [isViewSheetOpen, setIsViewSheetOpen] = useState(false);
   const deleteTaskMutation = usedeleteTaskMutation();
 
   // Sheet states
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [viewTask, setViewTask] = useState<Task | null>(null);
 
   // New task form state
   const [newTask, setNewTask] = useState({
@@ -235,6 +238,12 @@ export default function AllTaskScreen() {
     refetch,
   } = useAllTaskORGQuery(queryParams);
 
+    const priorityColors = {
+    low: "bg-gray-100 text-gray-800",
+    medium: "bg-orange-100 text-orange-800",
+    high: "bg-red-100 text-red-800",
+    urgent: "bg-purple-100 text-purple-800",
+  };
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -276,6 +285,10 @@ export default function AllTaskScreen() {
         setIsAddSheetOpen(false);
       },
     });
+  };
+    const handleViewTask = (task: Task) => {
+    setViewTask(task);
+    setIsViewSheetOpen(true);
   };
 
   const handleEditTask = (task: Task) => {
@@ -733,6 +746,14 @@ export default function AllTaskScreen() {
                           </Badge>
                         </div>
                       </div>
+                       <Button
+                        variant="ghost"
+                        onClick={() => handleViewTask(task)}
+                        size="icon"
+                        className="h-8 w-8 text-blue-600 hover:text-blue-700"
+                      >
+                        <View className="h-4 w-4" />
+                      </Button>
                       <div className="flex gap-1">
                         <Button
                           variant="ghost"
@@ -1096,6 +1117,46 @@ export default function AllTaskScreen() {
           </div>
         </SheetContent>
       </Sheet>
+       <Sheet
+              open={isViewSheetOpen}
+              onOpenChange={(open) => setIsViewSheetOpen(open)} // <-- FIX
+            >
+              <SheetContent className="bg-white">
+                <>
+                  <SheetHeader>
+                    <SheetTitle>{viewTask?.name}</SheetTitle>
+                    <SheetDescription>{viewTask?.description}</SheetDescription>
+                  </SheetHeader>
+      
+                  <div className="mt-6 space-y-4">
+                    <div className="flex gap-2">
+                      <Badge className={priorityColors[viewTask?.priority]}>
+                        {viewTask?.priority}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      <p>
+                        <strong>Assignee:</strong> {viewTask?.assignto.firstName}
+                        {viewTask?.assignto.lastName}
+                      </p>
+                      <p>
+                        <strong>Due Date:</strong> {formatDate(viewTask?.duedate)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-semibold mb-2">Tags:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {viewTask?.tags.map((tag) => (
+                          <Badge key={tag} variant="outline">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              </SheetContent>
+            </Sheet>
     </div>
   );
 }
