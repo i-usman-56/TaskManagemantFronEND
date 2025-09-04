@@ -1,0 +1,6 @@
+name = "task-management-app"
+compatibility_date = "2024-09-04"
+compatibility_flags = ["nodejs_compat"]
+
+# Where the build output will go
+pages_build_output_dir = ".vercel/output/static"
