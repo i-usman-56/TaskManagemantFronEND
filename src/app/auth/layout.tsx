@@ -55,7 +55,7 @@ export default function AuthLayout({
                   <div className="text-white font-bold text-sm">TMS</div>
                 </div>
                 <span className="text-2xl font-bold text-gray-800">
-                  <span className="text-primaryBlue">Task</span> Manamgement
+                  <span className="text-primaryBlue">Task</span> Manamgement System Uplaod Window
                   <span className="text-primaryBlue"> System</span>
                 </span>
               </div>
