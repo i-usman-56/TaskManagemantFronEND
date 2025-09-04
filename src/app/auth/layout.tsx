@@ -56,7 +56,7 @@ export default function AuthLayout({
                 </div>
                 <span className="text-2xl font-bold text-gray-800">
                   <span className="text-primaryBlue">Task</span> Manamgement
-                  <span className="text-primaryBlue"> System Cloudfare</span>
+                  <span className="text-primaryBlue"> System</span>
                 </span>
               </div>
             </div>
