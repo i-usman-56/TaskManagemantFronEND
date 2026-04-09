@@ -57,7 +57,11 @@ import {
   Star,
   Tag,
   View,
+  Columns3,
+  LayoutGrid,
 } from "lucide-react";
+import KanbanBoard from "@/components/screens/allTasks/KanbanBoard";
+import AddTaskModal from "@/components/screens/allTasks/AddTaskModal";
 import {
   useaddTaskMutation,
   useAllTaskUserQuery,
@@ -168,6 +172,14 @@ function TaskCardSkeleton() {
 }
 
 export default function MyTaskScreen() {
+  // View mode
+  const [viewMode, setViewMode] = useState<"kanban" | "grid">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("myTaskViewMode") as "kanban" | "grid") || "kanban";
+    }
+    return "kanban";
+  });
+
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -420,136 +432,71 @@ const getUserInitials = (
               Track and manage your personal tasks and assignments
             </p>
           </div>
-          <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-            <SheetTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add Task
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="bg-white overflow-y-scroll w-full lg:w-[40%]">
-              <SheetHeader>
-                <SheetTitle>Add New Task</SheetTitle>
-                <SheetDescription>Create a new personal task</SheetDescription>
-              </SheetHeader>
-              <div className="space-y-4 mt-6">
-                <div>
-                  <Label htmlFor="name">Task Title</Label>
-                  <Input
-                    id="name"
-                    value={newTask.name}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, name: e.target.value })
-                    }
-                    placeholder="Enter task title"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newTask.description}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, description: e.target.value })
-                    }
-                    placeholder="Enter task description"
-                    rows={3}
-                  />
-                </div>
-                {/* <div>
-                  <Label htmlFor="image">Image File</Label>
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      setNewTask({
-                        ...newTask,
-                        image: e.target.files ? e.target.files[0] : null,
-                      })
-                    }
-                  />
-                </div> */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={newTask.status}
-                      onValueChange={(value: any) =>
-                        setNewTask({ ...newTask, status: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="todo">To Do</SelectItem>
-                        <SelectItem value="inProgress">In Progress</SelectItem>
-                        <SelectItem value="Testing">Testing</SelectItem>
-                        <SelectItem value="inReveiw">Review</SelectItem>
-                        <SelectItem value="Completed">Completed</SelectItem>
-                        <SelectItem value="inQueue">In Queue</SelectItem>
-                        <SelectItem value="bugFound">Bug Found</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="priority">Priority</Label>
-                    <Select
-                      value={newTask.priority}
-                      onValueChange={(value: any) =>
-                        setNewTask({ ...newTask, priority: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="duedate">Due Date</Label>
-                  <Input
-                    id="duedate"
-                    type="date"
-                    value={newTask.duedate}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, duedate: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="tags">Tags (comma separated)</Label>
-                  <Input
-                    id="tags"
-                    value={newTask.tags}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, tags: e.target.value })
-                    }
-                    placeholder="Frontend, Design, API"
-                  />
-                </div>
-                <Button
-                  onClick={handleAddTask}
-                  className="w-full"
-                  disabled={addTaskMutation.isLoading}
-                >
-                  {addTaskMutation.isLoading && (
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Add Task
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center border rounded-lg overflow-hidden">
+              <button
+                onClick={() => {
+                  setViewMode("kanban");
+                  localStorage.setItem("myTaskViewMode", "kanban");
+                }}
+                className={`p-2 ${
+                  viewMode === "kanban"
+                    ? "bg-primaryBlue text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+                title="Kanban View"
+              >
+                <Columns3 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => {
+                  setViewMode("grid");
+                  localStorage.setItem("myTaskViewMode", "grid");
+                }}
+                className={`p-2 ${
+                  viewMode === "grid"
+                    ? "bg-primaryBlue text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50"
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+          <Button
+            className="flex items-center gap-2 bg-primaryBlue hover:bg-hoverBlue"
+            onClick={() => setIsAddSheetOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            Add Task
+          </Button>
+          <AddTaskModal
+            open={isAddSheetOpen}
+            onOpenChange={setIsAddSheetOpen}
+            defaultStatus={newTask.status}
+            currentUserId={userData?.user._id || ""}
+            mode="personal"
+          />
+          </div>
         </div>
 
+        {/* Kanban View */}
+        {viewMode === "kanban" ? (
+          <KanbanBoard
+            searchQuery={debouncedSearchTerm}
+            priorityFilter={priorityFilter}
+            onAddTask={(defaultStatus) => {
+              if (defaultStatus) {
+                setNewTask((prev) => ({ ...prev, status: defaultStatus as any }));
+              }
+              setIsAddSheetOpen(true);
+            }}
+            members={[]}
+            mode="personal"
+            currentUserId={userData?.user._id}
+          />
+        ) : (
+        <>
         {/* Statistics Cards */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
@@ -955,6 +902,8 @@ const getUserInitials = (
             </div>
           </div>
         )}
+      </>
+      )}
       </div>
 
       {/* Edit Task Sheet */}

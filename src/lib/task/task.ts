@@ -30,6 +30,7 @@ export interface User {
   enable2fa: boolean;
   phone2fa: boolean;
   email2fa: boolean;
+  isActive?: boolean;
   isDelete: boolean;
   role: string;
   organizationId: string;
@@ -42,28 +43,70 @@ export interface User {
   profilePic: string | null;
 }
 
+export interface DocLink {
+  title: string;
+  url: string;
+}
+
 // 📌 Single Task
 export interface Task {
   _id: string;
   name: string;
   description: string;
   image: string | null;
-  status:
-    | "todo"
-    | "InProgress"
-    | "Completed"
-    | "inQueue"
-    | "todo"
-    | "Testing"
-    | "bugFound"
-    | "inReveiw"; // ✅ Strong typing
+  attachments: string[];
+  docLinks: DocLink[];
+  status: string;
+  position: number;
   duedate: string;
   tags: string[];
   assignto: User;
   createdBy: User;
   priority: "low" | "medium" | "high" | "urgent";
+  commentCount?: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface KanbanColumn {
+  _id: string;
+  tasks: Task[];
+  count: number;
+}
+
+export interface KanbanResponse {
+  success: boolean;
+  columns: KanbanColumn[];
+}
+
+export interface BoardColumnConfig {
+  _id: string;
+  title: string;
+  statusKey: string;
+  position: number;
+  isDefault: boolean;
+  color: string;
+}
+
+export interface BoardColumnsResponse {
+  success: boolean;
+  columns: BoardColumnConfig[];
+}
+
+export interface Comment {
+  _id: string;
+  content: string;
+  taskId: string;
+  commentedBy: User;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CommentsResponse {
+  success: boolean;
+  comments: Comment[];
+  pagination: Pagination;
 }
 
 // 📊 Pagination info
@@ -203,6 +246,42 @@ export const taskApi = {
   dashBoardToday: async (): Promise<DashBoardStatsTodayResponse> => {
     const response = await apiClient.get<DashBoardStatsTodayResponse>(
       `/api/task/dashboard-today-task`
+    );
+    return response.data;
+  },
+
+  allTaskKanban: async (params?: {
+    assignto?: string;
+  }): Promise<KanbanResponse> => {
+    const filteredParams = params
+      ? Object.fromEntries(
+          Object.entries(params).filter(
+            ([_, value]) => value !== undefined && value !== null && value !== ""
+          )
+        )
+      : {};
+    const response = await apiClient.get<KanbanResponse>(
+      `/api/task/all-task-kanban`,
+      { params: filteredParams }
+    );
+    return response.data;
+  },
+
+  myTaskKanban: async (): Promise<KanbanResponse> => {
+    const response = await apiClient.get<KanbanResponse>(
+      `/api/task/my-task-kanban`
+    );
+    return response.data;
+  },
+
+  updatePosition: async (data: {
+    id: string;
+    status: string;
+    position: number;
+  }): Promise<updateTaskResponse> => {
+    const response = await apiClient.patch<updateTaskResponse>(
+      `/api/task/update-position/${data.id}`,
+      { status: data.status, position: data.position }
     );
     return response.data;
   },

@@ -15,6 +15,7 @@ import { useLoginMutation } from "@/hooks/use-auth-mutations";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
   const router = useRouter();
   const loginMutaion = useLoginMutation();
 
@@ -53,6 +54,7 @@ export default function LoginPage() {
     loginMutaion.mutate({
       email: data.email,
       password: data.password,
+      ...(isAdminLogin && { isadmin: true }),
     });
   };
 
@@ -131,20 +133,37 @@ export default function LoginPage() {
             )}
           </div>
           <div className="flex justify-between">
-            <div className="gap-2 flex items-center justify-normal">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                name="rememberMe"
-                className="accent-[#005294]"
-                onClick={(e) => e.stopPropagation()}
-              />
-              <label
-                htmlFor="rememberMe"
-                className="text-[16px] font-medium cursor-pointer leading-[150%] tracking-[-2%] font-manrope text-[#1A1C1E]"
-              >
-                Remember Me
-              </label>
+            <div className="flex items-center gap-4">
+              <div className="gap-2 flex items-center justify-normal">
+                <input
+                  type="checkbox"
+                  id="rememberMe"
+                  name="rememberMe"
+                  className="accent-[#005294]"
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <label
+                  htmlFor="rememberMe"
+                  className="text-[16px] font-medium cursor-pointer leading-[150%] tracking-[-2%] font-manrope text-[#1A1C1E]"
+                >
+                  Remember Me
+                </label>
+              </div>
+              <div className="gap-2 flex items-center justify-normal">
+                <input
+                  type="checkbox"
+                  id="adminLogin"
+                  checked={isAdminLogin}
+                  onChange={(e) => setIsAdminLogin(e.target.checked)}
+                  className="accent-[#005294]"
+                />
+                <label
+                  htmlFor="adminLogin"
+                  className="text-[14px] font-medium cursor-pointer leading-[150%] tracking-[-2%] font-manrope text-[#64748B]"
+                >
+                  Admin
+                </label>
+              </div>
             </div>
             <Link href={`/auth/forget-password`}>
               <div>
