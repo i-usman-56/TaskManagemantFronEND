@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Calendar,
   ChevronLeft,
@@ -20,6 +20,11 @@ import {
   User,
   CalendarDays,
   TrendingUp,
+  Tag,
+  FileText,
+  ExternalLink,
+  Paperclip,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useCalenderQuery } from "@/hooks/use-calender-query";
 
@@ -29,10 +34,16 @@ interface Task {
   id: string;
   title: string;
   description: string;
+  status: string;
   priority: TaskPriority;
   assignee: string;
+  assigneeEmail: string;
   dueDate: Date;
   tags: string[];
+  image: string | null;
+  attachments: string[];
+  docLinks: { title: string; url: string }[];
+  createdAt: string;
 }
 
 const priorityColors = {
@@ -47,6 +58,7 @@ type ViewType = "today" | "week" | "month";
 export default function CalendarScreen() {
   const [currentView, setCurrentView] = useState<ViewType>("today");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const {
     data: apiData,
@@ -59,16 +71,22 @@ export default function CalendarScreen() {
       id: task.id,
       title: task.title,
       description: task.description,
+      status: task.status,
       priority: task.priority as TaskPriority,
       assignee: task.assignee,
+      assigneeEmail: task.assigneeEmail || "",
       dueDate: new Date(task.dueDate),
       tags: task.tags || [],
+      image: task.image || null,
+      attachments: task.attachments || [],
+      docLinks: task.docLinks || [],
+      createdAt: task.createdAt || "",
     })) || [];
 
   const getTodayTasks = () => {
-    const today = new Date();
-    console.log(tasks);
-    return tasks
+    return tasks.filter(
+      (task) => task.dueDate.toDateString() === currentDate.toDateString()
+    );
   };
 
   const getUpcomingTasks = () => {
@@ -274,11 +292,11 @@ export default function CalendarScreen() {
         </div>
 
         <div className="text-center py-4 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border">
-          <h2 className="text-3xl font-bold mb-2">{formatDate(new Date())}</h2>
+          <h2 className="text-3xl font-bold mb-2">{formatDate(currentDate)}</h2>
           <p className="text-muted-foreground">
             {todayTasks.length > 0
-              ? `${todayTasks.length} tasks scheduled for today`
-              : "No tasks scheduled for today"}
+              ? `${todayTasks.length} tasks scheduled for this day`
+              : "No tasks scheduled for this day"}
           </p>
         </div>
 
@@ -290,84 +308,29 @@ export default function CalendarScreen() {
             </h3>
             <div className="grid gap-4">
               {todayTasks.map((task) => (
-                <Sheet key={task.id}>
-                  <SheetTrigger asChild>
-                    <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
-                      <CardContent className="p-5">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-lg mb-1">
-                              {task.title}
-                            </h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">
-                              {task.description}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-2 ml-4">
-                            <Badge className={priorityColors[task.priority]}>
-                              {task.priority}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <User className="w-4 h-4" />
-                              {task.assignee}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {task.tags.slice(0, 2).map((tag) => (
-                              <Badge
-                                key={tag}
-                                variant="outline"
-                                className="text-xs"
-                              >
-                                {tag}
-                              </Badge>
-                            ))}
-                            {task.tags.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{task.tags.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </SheetTrigger>
-                  <SheetContent className="bg-white">
-                    <SheetHeader>
-                      <SheetTitle>{task.title}</SheetTitle>
-                      <SheetDescription>{task.description}</SheetDescription>
-                    </SheetHeader>
-                    <div className="mt-6 space-y-4">
-                      <div className="flex gap-2">
-                        <Badge className={priorityColors[task.priority]}>
-                          {task.priority}
-                        </Badge>
+                <Card key={task.id} className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]" onClick={() => setSelectedTask(task)}>
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-lg mb-1">{task.title}</h4>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{task.description}</p>
                       </div>
-                      <div className="space-y-2">
-                        <p>
-                          <strong>Assignee:</strong> {task.assignee}
-                        </p>
-                        <p>
-                          <strong>Due Date:</strong> {formatDate(task.dueDate)}
-                        </p>
+                      <Badge className={priorityColors[task.priority]}>{task.priority}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <User className="w-4 h-4" />
+                        {task.assignee}
                       </div>
-                      <div>
-                        <p className="font-semibold mb-2">Tags:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {task.tags.map((tag) => (
-                            <Badge key={tag} variant="outline">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
+                      <div className="flex flex-wrap gap-1">
+                        {task.tags.slice(0, 2).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                        ))}
+                        {task.tags.length > 2 && <Badge variant="outline" className="text-xs">+{task.tags.length - 2}</Badge>}
                       </div>
                     </div>
-                  </SheetContent>
-                </Sheet>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -381,62 +344,17 @@ export default function CalendarScreen() {
             </h3>
             <div className="grid gap-3">
               {upcomingTasks.slice(0, 3).map((task) => (
-                <Sheet key={task.id}>
-                  <SheetTrigger asChild>
-                    <Card className="cursor-pointer hover:shadow-md transition-shadow bg-slate-50/50">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-medium mb-1">{task.title}</h4>
-                            <p className="text-sm text-muted-foreground">
-                              Due: {formatDate(task.dueDate)}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge
-                              className={`${
-                                priorityColors[task.priority]
-                              } text-xs`}
-                            >
-                              {task.priority}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </SheetTrigger>
-                  <SheetContent className="bg-white">
-                    <SheetHeader>
-                      <SheetTitle>{task.title}</SheetTitle>
-                      <SheetDescription>{task.description}</SheetDescription>
-                    </SheetHeader>
-                    <div className="mt-6 space-y-4">
-                      <div className="flex gap-2">
-                        <Badge className={priorityColors[task.priority]}>
-                          {task.priority}
-                        </Badge>
+                <Card key={task.id} className="cursor-pointer hover:shadow-md transition-shadow bg-slate-50/50" onClick={() => setSelectedTask(task)}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <h4 className="font-medium mb-1">{task.title}</h4>
+                        <p className="text-sm text-muted-foreground">Due: {formatDate(task.dueDate)}</p>
                       </div>
-                      <div className="space-y-2">
-                        <p>
-                          <strong>Assignee:</strong> {task.assignee}
-                        </p>
-                        <p>
-                          <strong>Due Date:</strong> {formatDate(task.dueDate)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-semibold mb-2">Tags:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {task.tags.map((tag) => (
-                            <Badge key={tag} variant="outline">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+                      <Badge className={`${priorityColors[task.priority]} text-xs`}>{task.priority}</Badge>
                     </div>
-                  </SheetContent>
-                </Sheet>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -469,51 +387,13 @@ export default function CalendarScreen() {
                 </CardHeader>
                 <CardContent className="p-2 space-y-1">
                   {dayTasks.map((task) => (
-                    <Sheet key={task.id}>
-                      <SheetTrigger asChild>
-                        <div
-                          className={`text-xs p-1 rounded cursor-pointer ${
-                            priorityColors[task.priority]
-                          }`}
-                        >
-                          {task.title}
-                        </div>
-                      </SheetTrigger>
-                      <SheetContent className="bg-white">
-                        <SheetHeader>
-                          <SheetTitle>{task.title}</SheetTitle>
-                          <SheetDescription>
-                            {task.description}
-                          </SheetDescription>
-                        </SheetHeader>
-                        <div className="mt-6 space-y-4">
-                          <div className="flex gap-2">
-                            <Badge className={priorityColors[task.priority]}>
-                              {task.priority}
-                            </Badge>
-                          </div>
-                          <div className="space-y-2">
-                            <p>
-                              <strong>Assignee:</strong> {task.assignee}
-                            </p>
-                            <p>
-                              <strong>Due Date:</strong>{" "}
-                              {formatDate(task.dueDate)}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="font-semibold mb-2">Tags:</p>
-                            <div className="flex flex-wrap gap-2">
-                              {task.tags.map((tag) => (
-                                <Badge key={tag} variant="outline">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </SheetContent>
-                    </Sheet>
+                    <div
+                      key={task.id}
+                      className={`text-xs p-1 rounded cursor-pointer ${priorityColors[task.priority]}`}
+                      onClick={() => setSelectedTask(task)}
+                    >
+                      {task.title}
+                    </div>
                   ))}
                 </CardContent>
               </Card>
@@ -554,51 +434,13 @@ export default function CalendarScreen() {
                   </div>
                   <div className="space-y-1">
                     {dayTasks.slice(0, 2).map((task) => (
-                      <Sheet key={task.id}>
-                        <SheetTrigger asChild>
-                          <div
-                            className={`text-xs p-1 rounded cursor-pointer truncate ${
-                              priorityColors[task.priority]
-                            }`}
-                          >
-                            {task.title}
-                          </div>
-                        </SheetTrigger>
-                        <SheetContent className="bg-white">
-                          <SheetHeader>
-                            <SheetTitle>{task.title}</SheetTitle>
-                            <SheetDescription>
-                              {task.description}
-                            </SheetDescription>
-                          </SheetHeader>
-                          <div className="mt-6 space-y-4">
-                            <div className="flex gap-2">
-                              <Badge className={priorityColors[task.priority]}>
-                                {task.priority}
-                              </Badge>
-                            </div>
-                            <div className="space-y-2">
-                              <p>
-                                <strong>Assignee:</strong> {task.assignee}
-                              </p>
-                              <p>
-                                <strong>Due Date:</strong>{" "}
-                                {formatDate(task.dueDate)}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="font-semibold mb-2">Tags:</p>
-                              <div className="flex flex-wrap gap-2">
-                                {task.tags.map((tag) => (
-                                  <Badge key={tag} variant="outline">
-                                    {tag}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </SheetContent>
-                      </Sheet>
+                      <div
+                        key={task.id}
+                        className={`text-xs p-1 rounded cursor-pointer truncate ${priorityColors[task.priority]}`}
+                        onClick={() => setSelectedTask(task)}
+                      >
+                        {task.title}
+                      </div>
                     ))}
                     {dayTasks.length > 2 && (
                       <div className="text-xs text-muted-foreground">
@@ -680,6 +522,180 @@ export default function CalendarScreen() {
           {currentView === "month" && renderMonthView()}
         </div>
       </div>
+      {/* Task Detail Modal — read-only, same two-column layout as create/edit */}
+      <Dialog open={!!selectedTask} onOpenChange={(open) => { if (!open) setSelectedTask(null); }}>
+        <DialogContent className="max-w-4xl bg-white max-h-[90vh] overflow-y-auto p-0">
+          <div className="p-6">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="text-xl font-semibold text-gray-900">
+                {selectedTask?.title}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedTask && (
+              <div className="flex gap-6">
+                {/* Left column — 65% */}
+                <div className="flex-1 space-y-6 min-w-0">
+                  {/* Description */}
+                  <div>
+                    <Label className="text-xs text-gray-500 mb-1">Description</Label>
+                    <p className="text-sm text-gray-700 whitespace-pre-wrap rounded p-2 bg-gray-50 min-h-[40px]">
+                      {selectedTask.description || "No description"}
+                    </p>
+                  </div>
+
+                  {/* Attachments */}
+                  {(selectedTask.attachments.length > 0 || selectedTask.image) && (
+                    <div>
+                      <Label className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                        <Paperclip className="w-3 h-3" /> Attachments
+                      </Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
+                        {selectedTask.image && (
+                          <a href={selectedTask.image} target="_blank" rel="noopener noreferrer" className="group relative aspect-video rounded-lg overflow-hidden border bg-gray-50 hover:shadow-md transition-shadow">
+                            <img src={selectedTask.image} alt="Task image" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                              <ExternalLink className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 drop-shadow transition-opacity" />
+                            </div>
+                          </a>
+                        )}
+                        {selectedTask.attachments.map((url, i) => {
+                          const isImage = /\.(jpg|jpeg|png|gif|webp|svg)$/i.test(url);
+                          return isImage ? (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="group relative aspect-video rounded-lg overflow-hidden border bg-gray-50 hover:shadow-md transition-shadow">
+                              <img src={url} alt={`Attachment ${i + 1}`} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                <ExternalLink className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 drop-shadow transition-opacity" />
+                              </div>
+                            </a>
+                          ) : (
+                            <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 p-3 rounded-lg border bg-gray-50 hover:bg-gray-100 transition-colors">
+                              <FileText className="w-5 h-5 text-gray-400 shrink-0" />
+                              <span className="text-sm text-blue-600 truncate">Attachment {i + 1}</span>
+                              <ExternalLink className="w-3 h-3 text-gray-400 shrink-0 ml-auto" />
+                            </a>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Doc Links */}
+                  {selectedTask.docLinks.length > 0 && (
+                    <div>
+                      <Label className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                        <FileText className="w-3 h-3" /> Document Links
+                      </Label>
+                      <div className="space-y-2 mt-2">
+                        {selectedTask.docLinks.map((doc, i) => (
+                          <a
+                            key={i}
+                            href={doc.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-3 rounded-lg border bg-gray-50 hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                          >
+                            <FileText className="w-4 h-4 text-blue-500 shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-gray-700 group-hover:text-blue-700 truncate">{doc.title}</p>
+                              <p className="text-xs text-gray-400 truncate">{doc.url}</p>
+                            </div>
+                            <ExternalLink className="w-3 h-3 text-gray-400 group-hover:text-blue-500 shrink-0" />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right sidebar — 35% */}
+                <div className="w-[240px] shrink-0 space-y-4">
+                  {/* Status */}
+                  <div>
+                    <Label className="text-xs text-gray-500">Status</Label>
+                    <div className="mt-1">
+                      <Badge variant="secondary" className="capitalize">
+                        {selectedTask.status?.replace(/([A-Z])/g, " $1").trim() || "Todo"}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Priority */}
+                  <div>
+                    <Label className="text-xs text-gray-500">Priority</Label>
+                    <div className="mt-1">
+                      <Badge className={priorityColors[selectedTask.priority]}>
+                        {selectedTask.priority}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Assignee */}
+                  <div>
+                    <Label className="text-xs text-gray-500">Assignee</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="bg-blue-600 text-white text-[9px]">
+                          {selectedTask.assignee
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2) || "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{selectedTask.assignee}</p>
+                        {selectedTask.assigneeEmail && (
+                          <p className="text-xs text-gray-400 truncate">{selectedTask.assigneeEmail}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Due Date */}
+                  <div>
+                    <Label className="text-xs text-gray-500">Due Date</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <CalendarDays className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm">{formatDate(selectedTask.dueDate)}</span>
+                    </div>
+                  </div>
+
+                  {/* Tags */}
+                  {selectedTask.tags.length > 0 && (
+                    <div>
+                      <Label className="text-xs text-gray-500">Tags</Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedTask.tags.map((tag, i) => (
+                          <Badge key={i} variant="secondary" className="text-[10px]">
+                            <Tag className="w-2 h-2 mr-0.5" />
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Created info */}
+                  {selectedTask.createdAt && (
+                    <div className="pt-2 border-t text-xs text-gray-400">
+                      <p>
+                        Created{" "}
+                        {new Date(selectedTask.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

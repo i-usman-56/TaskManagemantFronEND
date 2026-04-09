@@ -73,7 +73,13 @@ export function useLoginMutation() {
 
       toast.success(data.data.message || "Login Successful");
       setTokens(data.data.accessToken, data.data.refreshToken);
-      router.push("/");
+
+      // Redirect admin users to admin panel instead of regular dashboard
+      if (data.data.user?.accountType === "admin") {
+        router.push("/dashboard/admin/users");
+      } else {
+        router.push("/");
+      }
     },
     onError: (error: any) => {
       const errorMessage =
