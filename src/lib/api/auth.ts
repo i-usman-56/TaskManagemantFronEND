@@ -24,6 +24,7 @@ export interface RegisterResponse {
 export interface LoginRequest {
   email: string;
   password: string;
+  isadmin?: boolean;
 }
 
 export interface LoginResponse {

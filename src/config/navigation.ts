@@ -62,5 +62,22 @@ export const getNavigationItems = (accountType: string) => {
     ];
   }
 
+  if (accountType === "admin") {
+    return [
+      {
+        name: "All Users",
+        icon: Users,
+        active: true,
+        route: "/dashboard/admin/users",
+      },
+      {
+        name: "All Tasks",
+        icon: ClipboardList,
+        active: false,
+        route: "/dashboard/admin/tasks",
+      },
+    ];
+  }
+
   return [...common];
 };

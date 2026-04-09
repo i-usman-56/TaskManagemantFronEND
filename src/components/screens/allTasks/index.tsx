@@ -57,6 +57,8 @@ import {
   Star,
   Tag,
   View,
+  LayoutGrid,
+  Columns3,
 } from "lucide-react";
 import {
   useaddTaskMutation,
@@ -73,6 +75,8 @@ import {
 } from "@/hooks/use-auth-mutations";
 import { useOrganizationMembersQuery } from "@/hooks/use-member-query";
 import toast from "react-hot-toast";
+import KanbanBoard from "./KanbanBoard";
+import AddTaskModal from "./AddTaskModal";
 
 const statusConfig = {
   todo: { label: "To Do", color: "bg-gray-100 text-gray-800", icon: Circle },
@@ -169,6 +173,19 @@ function TaskCardSkeleton() {
 }
 
 export default function AllTaskScreen() {
+  // View mode: grid or kanban
+  const [viewMode, setViewMode] = useState<"grid" | "kanban">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("allTaskViewMode") as "grid" | "kanban") || "kanban";
+    }
+    return "kanban";
+  });
+
+  const toggleViewMode = (mode: "grid" | "kanban") => {
+    setViewMode(mode);
+    localStorage.setItem("allTaskViewMode", mode);
+  };
+
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -420,182 +437,71 @@ const getUserInitials = (
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">My Tasks</h1>
+            <h1 className="text-3xl font-bold text-gray-900">All Tasks</h1>
             <p className="text-gray-600 mt-1">
-              Track and manage your personal tasks and assignments
+              Manage and track all organization tasks
             </p>
           </div>
-          <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-            <SheetTrigger asChild>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Add Task
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="bg-white overflow-y-scroll w-full lg:w-[40%]">
-              <SheetHeader>
-                <SheetTitle>Add New Task</SheetTitle>
-                <SheetDescription>Create a new personal task</SheetDescription>
-              </SheetHeader>
-              <div className="space-y-4 mt-6">
-                <div>
-                  <Label htmlFor="name">Task Title</Label>
-                  <Input
-                    id="name"
-                    value={newTask.name}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, name: e.target.value })
-                    }
-                    placeholder="Enter task title"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newTask.description}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, description: e.target.value })
-                    }
-                    placeholder="Enter task description"
-                    rows={3}
-                  />
-                </div>
-                {/* <div>
-                  <Label htmlFor="image">Image File</Label>
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) =>
-                      setNewTask({
-                        ...newTask,
-                        image: e.target.files ? e.target.files[0] : null,
-                      })
-                    }
-                  />
-                </div> */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={newTask.status}
-                      onValueChange={(value: any) =>
-                        setNewTask({ ...newTask, status: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="todo">To Do</SelectItem>
-                        <SelectItem value="inProgress">In Progress</SelectItem>
-                        <SelectItem value="Testing">Testing</SelectItem>
-                        <SelectItem value="inReveiw">Review</SelectItem>
-                        <SelectItem value="Completed">Completed</SelectItem>
-                        <SelectItem value="inQueue">In Queue</SelectItem>
-                        <SelectItem value="bugFound">Bug Found</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="priority">Priority</Label>
-                    <Select
-                      value={newTask.priority}
-                      onValueChange={(value: any) =>
-                        setNewTask({ ...newTask, priority: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="assignto">Assign To</Label>
-                  <Select
-                    value={newTask.assignto}
-                    onValueChange={(value: string) =>
-                      setNewTask({ ...newTask, assignto: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a member" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white max-h-60 overflow-y-auto">
-                      {/* Assign to myself */}
-                      <SelectItem value={userData?.user._id || ""}>
-                        Myself ({userData?.user.firstName}{" "}
-                        {userData?.user.lastName})
-                      </SelectItem>
-
-                      {/* Organization members */}
-                      {OrganizationData?.Members?.map((member) => (
-                        <SelectItem
-                          key={member.userid._id}
-                          value={member.userid._id}
-                        >
-                          {member.userid.firstName && member.userid.lastName ? (
-                            <>
-                              {member.userid.firstName.charAt(0)}
-                              {member.userid.lastName.charAt(0)}
-                            </>
-                          ) : (
-                            member.userid.username || ""
-                          )}
-                          <span className="text-xs text-gray-500">
-                            {member.role}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="duedate">Due Date</Label>
-                  <Input
-                    id="duedate"
-                    type="date"
-                    value={newTask.duedate}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, duedate: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="tags">Tags (comma separated)</Label>
-                  <Input
-                    id="tags"
-                    value={newTask.tags}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, tags: e.target.value })
-                    }
-                    placeholder="Frontend, Design, API"
-                  />
-                </div>
-                <Button
-                  onClick={handleAddTask}
-                  className="w-full"
-                  disabled={addTaskMutation.isLoading}
-                >
-                  {addTaskMutation.isLoading && (
-                    <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Add Task
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-2">
+            {/* View toggle */}
+            <div className="flex items-center border rounded-lg overflow-hidden">
+              <button
+                className={`p-2 ${
+                  viewMode === "kanban"
+                    ? "bg-primaryBlue text-white"
+                    : "bg-white text-gray-500 hover:bg-gray-50"
+                }`}
+                onClick={() => toggleViewMode("kanban")}
+                title="Kanban View"
+              >
+                <Columns3 className="h-4 w-4" />
+              </button>
+              <button
+                className={`p-2 ${
+                  viewMode === "grid"
+                    ? "bg-primaryBlue text-white"
+                    : "bg-white text-gray-500 hover:bg-gray-50"
+                }`}
+                onClick={() => toggleViewMode("grid")}
+                title="Grid View"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+          <Button
+            className="flex items-center gap-2 bg-primaryBlue hover:bg-hoverBlue"
+            onClick={() => setIsAddSheetOpen(true)}
+          >
+            <Plus className="h-4 w-4" />
+            Add Task
+          </Button>
+          <AddTaskModal
+            open={isAddSheetOpen}
+            onOpenChange={setIsAddSheetOpen}
+            members={OrganizationData?.Members?.map((m: any) => m.userid) || []}
+            defaultStatus={newTask.status}
+            currentUserId={userData?.user._id || ""}
+            mode="org"
+          />
+          </div>
         </div>
 
+        {/* Kanban View */}
+        {viewMode === "kanban" ? (
+          <KanbanBoard
+            searchQuery={debouncedSearchTerm}
+            priorityFilter={priorityFilter}
+            onAddTask={(defaultStatus) => {
+              if (defaultStatus) {
+                setNewTask((prev) => ({ ...prev, status: defaultStatus as any }));
+              }
+              setIsAddSheetOpen(true);
+            }}
+            members={OrganizationData?.Members || []}
+            currentUserId={userData?.user._id}
+          />
+        ) : (
+        <>
         {/* Statistics Cards */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
@@ -985,6 +891,8 @@ const getUserInitials = (
               </div>
             </div>
           </div>
+        )}
+        </>
         )}
       </div>
 

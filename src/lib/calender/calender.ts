@@ -6,18 +6,21 @@ export interface calendertaskRequest {
 }
 export interface calendertaskResponse {
   success: boolean;
-  tasks: [
-    {
-      id: string;
-      title: string;
-      description: string;
-      status: string;
-      priority: string;
-      assignee: string;
-      dueDate: string;
-      tags: [string];
-    }
-  ];
+  tasks: {
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    priority: string;
+    assignee: string;
+    assigneeEmail: string;
+    dueDate: string;
+    tags: string[];
+    image: string | null;
+    attachments: string[];
+    docLinks: { title: string; url: string }[];
+    createdAt: string;
+  }[];
 }
 
 export const calender = {
@@ -25,11 +28,7 @@ export const calender = {
     data: calendertaskRequest
   ): Promise<calendertaskResponse> => {
     const response = await apiClient.get<calendertaskResponse>(
-      `${
-        data.range === "today"
-          ? `/api/task/calender-task?range=${data.range}`
-          : `/api/task/calender-task?range=${data.range}&date=${data.date}`
-      }`
+      `/api/task/calender-task?range=${data.range}&date=${data.date}`
     );
     return response.data;
   },
